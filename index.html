@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="fr">
   <head>
     <meta charset="UTF-8" />
     <!-- Favicon -->
@@ -95,63 +95,53 @@
             return null;
           };
 
-          // Source (style à copier)
-          const src =
-            findByText('demander un echange') || findByText('demander un échange');
+        const src =
+          findByText('demander un echange') || findByText('demander un échange');
 
-          // Cible (à recolorer)
-          const dst =
-            findByText('decouvrir nos services') || findByText('découvrir nos services');
+        const dst =
+          findByText('decouvrir nos services') || findByText('découvrir nos services');
 
-          if (src && dst) {
-            const cs = getComputedStyle(src);
-            const props = [
-              'background','backgroundColor','backgroundImage','backgroundSize','backgroundPosition','backgroundRepeat',
-              'border','borderColor','borderStyle','borderWidth','borderRadius','boxShadow',
-              'color','textTransform','letterSpacing','fontWeight',
-              'padding','paddingTop','paddingBottom','paddingLeft','paddingRight',
-              'transition','filter'
-            ];
-            props.forEach(p => { try { dst.style[p] = cs[p]; } catch(e){} });
-            dst.style.cursor = 'pointer';
-          }
+        if (src && dst) {
+          const cs = getComputedStyle(src);
+          const props = [
+            'background','backgroundColor','backgroundImage','backgroundSize','backgroundPosition','backgroundRepeat',
+            'border','borderColor','borderStyle','borderWidth','borderRadius','boxShadow',
+            'color','textTransform','letterSpacing','fontWeight',
+            'padding','paddingTop','paddingBottom','paddingLeft','paddingRight',
+            'transition','filter'
+          ];
+          props.forEach(p => { try { dst.style[p] = cs[p]; } catch(e){} });
+          dst.style.cursor = 'pointer';
         }
+      }
 
-        window.addEventListener('load', () => {
-          equalizeButtons();
-          setTimeout(equalizeButtons, 200);
+      window.addEventListener('load', () => {
+        equalizeButtons();
+        setTimeout(equalizeButtons, 200);
+      });
+
+      const root = document.getElementById('root');
+      if (root) {
+        let t;
+        const mo = new MutationObserver(() => {
+          clearTimeout(t);
+          t = setTimeout(equalizeButtons, 60);
         });
-
-        const root = document.getElementById('root');
-        if (root) {
-          let t;
-          const mo = new MutationObserver(() => {
-            clearTimeout(t);
-            t = setTimeout(equalizeButtons, 60);
-          });
-          mo.observe(root, { childList: true, subtree: true });
-        }
+        mo.observe(root, { childList: true, subtree: true });
+      }
       })();
     </script>
 
-    <!-- Footer: met à jour (ou crée) les liens Services + ajoute CGV / Politique, sans doublon -->
+    <!-- Liens légaux dans le footer : CGV & Politique de confidentialité (ajoutés s'ils manquent) -->
     <script>
       (function () {
-        const norm = s =>
-          (s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
-
-        const SERVICES = [
-          { text: 'Revalorisation de lots', href: '/revalorisation.html' },
-          { text: 'Mise en relation B2B', href: '/mise-en-relation-b2b.html' },
-          { text: 'Conseil en négoce', href: '/conseil-negoce.html' },
-          { text: 'Solutions discrètes', href: '/solutions-discretes.html' },
-        ];
-
-        function upsertLinks() {
+        function addLegalLinks() {
           const root = document.getElementById('root');
           if (!root) return;
 
-          // Récupérer le footer existant, sinon créer
+          // Ne pas dupliquer
+          if (root.querySelector('.legal-links')) return;
+
           let footer = root.querySelector('footer');
           if (!footer) {
             footer = document.createElement('footer');
@@ -161,101 +151,83 @@
             root.appendChild(footer);
           }
 
-          // 1) SERVICES : met à jour les liens existants par leur texte, sinon crée un bloc
-          let svcWrap = footer.querySelector('.service-links');
-          if (!svcWrap) {
-            // Cherche s'il y a déjà des ancres avec ces textes quelque part dans le footer
-            const allA = Array.from(footer.querySelectorAll('a'));
-            const found = SERVICES.map(item => {
-              const matches = allA.filter(a => norm(a.textContent) === norm(item.text));
-              // si plusieurs, on garde la première et on supprime les doublons
-              if (matches.length > 1) {
-                matches.slice(1).forEach(d => d.remove());
-              }
-              if (matches[0]) {
-                matches[0].setAttribute('href', item.href);
-                return matches[0];
-              }
-              return null;
-            });
+          const wrap = document.createElement('div');
+          wrap.className = 'legal-links';
+          wrap.style.display = 'flex';
+          wrap.style.justifyContent = 'center';
+          wrap.style.flexWrap = 'wrap';
+          wrap.style.gap = '1rem';
+          wrap.style.fontSize = '0.9rem';
+          wrap.style.opacity = '0.9';
 
-            // S'il manque au moins un lien, on crée le conteneur et on ajoute les manquants
-            if (found.some(el => !el)) {
-              svcWrap = document.createElement('div');
-              svcWrap.className = 'service-links';
-              svcWrap.style.display = 'flex';
-              svcWrap.style.justifyContent = 'center';
-              svcWrap.style.flexWrap = 'wrap';
-              svcWrap.style.gap = '1rem';
-              svcWrap.style.fontSize = '0.95rem';
+          const mk = (href, text) => {
+            const a = document.createElement('a');
+            a.href = href;
+            a.textContent = text;
+            a.target = '_blank';
+            a.rel = 'noopener noreferrer';
+            a.style.textDecoration = 'underline';
+            return a;
+          };
 
-              SERVICES.forEach((item, idx) => {
-                const el = found[idx];
-                if (el) {
-                  // s'il existe déjà (corrigé), on l’insère dans l’ordre
-                  svcWrap.appendChild(el);
-                } else {
-                  const a = document.createElement('a');
-                  a.textContent = item.text;
-                  a.href = item.href;
-                  a.style.textDecoration = 'underline';
-                  svcWrap.appendChild(a);
-                }
-              });
+          wrap.appendChild(mk('https://solustoc.com/cgv/', 'CGV'));
+          wrap.appendChild(mk('https://solustoc.com/politique-de-confidentialite-2/', 'Politique de confidentialité'));
 
-              // placer les services en tête du footer (avant les liens légaux)
-              footer.prepend(svcWrap);
-            }
-          } else {
-            // Met à jour les href et enlève doublons à l'intérieur du bloc
-            SERVICES.forEach(item => {
-              const matches = Array.from(svcWrap.querySelectorAll('a'))
-                .filter(a => norm(a.textContent) === norm(item.text));
-              if (matches.length) {
-                matches[0].setAttribute('href', item.href);
-                matches.slice(1).forEach(d => d.remove());
-              } else {
-                const a = document.createElement('a');
-                a.textContent = item.text;
-                a.href = item.href;
-                a.style.textDecoration = 'underline';
-                svcWrap.appendChild(a);
-              }
-            });
-          }
-
-          // 2) LIENS LÉGAUX : ajoute une seule fois
-          if (!footer.querySelector('.legal-links')) {
-            const legal = document.createElement('div');
-            legal.className = 'legal-links';
-            legal.style.display = 'flex';
-            legal.style.justifyContent = 'center';
-            legal.style.flexWrap = 'wrap';
-            legal.style.gap = '1rem';
-            legal.style.fontSize = '0.9rem';
-            legal.style.opacity = '0.9';
-            const mk = (href, text) => {
-              const a = document.createElement('a');
-              a.href = href;
-              a.textContent = text;
-              a.target = '_blank';
-              a.rel = 'noopener noreferrer';
-              a.style.textDecoration = 'underline';
-              return a;
-            };
-            legal.appendChild(mk('https://solustoc.com/cgv/', 'CGV'));
-            legal.appendChild(mk('https://solustoc.com/politique-de-confidentialite-2/', 'Politique de confidentialité'));
-            footer.appendChild(legal);
-          }
+          footer.appendChild(wrap);
         }
 
-        // Lance et réapplique si React modifie le DOM
-        window.addEventListener('load', () => {
-          upsertLinks();
-          setTimeout(upsertLinks, 200);
-        });
-        const mo = new MutationObserver(() => upsertLinks());
+        window.addEventListener('load', addLegalLinks);
+        const mo = new MutationObserver(() => addLegalLinks());
         mo.observe(document.documentElement, { childList: true, subtree: true });
+      })();
+    </script>
+
+    <!-- Nettoyage footer : supprime les doublons SANS lien (garde les versions cliquables) -->
+    <script>
+      (function () {
+        const SERVICES = [
+          'Revalorisation de lots',
+          'Mise en relation B2B',
+          'Conseil en négoce',
+          'Solutions discrètes'
+        ];
+        const norm = s => (s||'')
+          .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+          .toLowerCase().replace(/\s+/g,' ').trim();
+
+        function cleanFooter() {
+          const root = document.getElementById('root');
+          const footer = (root && root.querySelector('footer')) || document.querySelector('footer');
+          if (!footer) return;
+
+          const names = SERVICES.map(norm);
+
+          // 1) Supprime les TEXT NODES directs du footer correspondant aux libellés (sans lien)
+          Array.from(footer.childNodes).forEach(node => {
+            if (node.nodeType === 3) { // texte brut
+              const t = norm(node.textContent);
+              if (names.some(n => t.includes(n))) node.remove();
+            }
+          });
+
+          // 2) Supprime les éléments sans <a> qui ne sont que du texte des libellés
+          const leaves = footer.querySelectorAll('*:not(a)');
+          leaves.forEach(el => {
+            if (el.classList && (el.classList.contains('service-links') || el.classList.contains('legal-links'))) return;
+            if (el.querySelector && el.querySelector('a')) return; // s'il y a un lien, on garde
+            if (el.childElementCount > 0) return; // on ne supprime que les "feuilles"
+
+            const t = norm(el.textContent);
+            if (!t) return;
+            if (names.some(n => t === n || t.includes(n))) {
+              el.remove();
+            }
+          });
+        }
+
+        window.addEventListener('load', () => { cleanFooter(); setTimeout(cleanFooter, 200); });
+        new MutationObserver(() => cleanFooter())
+          .observe(document.documentElement, { childList: true, subtree: true });
       })();
     </script>
   </body>
