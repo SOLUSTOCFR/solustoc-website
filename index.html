@@ -234,5 +234,72 @@
         }).observe(observerTarget, { childList: true, subtree: true });
       })();
     </script>
+    <!-- Linkifier les 4 services du footer (convertit le texte en <a href="...">) -->
+<script>
+(function(){
+  const MAP = {
+    'revalorisation de lots': '/revalorisation.html',
+    'mise en relation b2b':   '/mise-en-relation-b2b.html',
+    'conseil en négoce':      '/conseil-negoce.html',
+    'solutions discrètes':    '/solutions-discretes.html'
+  };
+  const norm = s => (s||'')
+    .normalize('NFD').replace(/[\u0300-\u036f]/g,'') // accents
+    .toLowerCase().replace(/\s+/g,' ').trim();
+
+  function linkifyFooter() {
+    const root = document.getElementById('root');
+    const footer = (root && root.querySelector('footer')) || document.querySelector('footer');
+    if (!footer) return;
+
+    // 1) Si un petit élément (span/p/div/li...) contient EXACTEMENT un libellé sans lien → remplace par <a>
+    const leaves = footer.querySelectorAll('*:not(a)');
+    leaves.forEach(el => {
+      if (el.childElementCount > 0) return;              // seulement des "feuilles"
+      if (el.querySelector && el.querySelector('a')) return; // si un lien est dedans, on ne touche pas
+      const raw = (el.textContent || '').trim();
+      if (!raw) return;
+      const key = norm(raw);
+      if (MAP[key]) {
+        const a = document.createElement('a');
+        a.href = MAP[key];
+        a.textContent = raw;
+        a.style.textDecoration = 'underline';
+        el.replaceWith(a);
+      }
+    });
+
+    // 2) Si c’est du texte brut (nœud texte) → remplace le nœud texte par <a>
+    const walker = document.createTreeWalker(footer, NodeFilter.SHOW_TEXT);
+    const toReplace = [];
+    while (walker.nextNode()) {
+      const tn = walker.currentNode;
+      const raw = (tn.nodeValue || '').trim();
+      if (!raw) continue;
+      if (tn.parentNode && tn.parentNode.closest('a')) continue; // déjà dans un lien → ne rien faire
+      const key = norm(raw);
+      if (MAP[key]) {
+        const a = document.createElement('a');
+        a.href = MAP[key];
+        a.textContent = raw;
+        a.style.textDecoration = 'underline';
+        toReplace.push({ tn, a });
+      }
+    }
+    toReplace.forEach(({ tn, a }) => tn.parentNode && tn.parentNode.replaceChild(a, tn));
+  }
+
+  // Lance tôt et relance juste après (pour les rendus différés)
+  window.addEventListener('load', () => { 
+    linkifyFooter(); 
+    setTimeout(linkifyFooter, 120); 
+  });
+
+  // Si le DOM change, on re-linkifie
+  new MutationObserver(() => linkifyFooter())
+    .observe(document.documentElement, { childList: true, subtree: true });
+})();
+</script>
+
   </body>
 </html>
