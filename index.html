@@ -7,6 +7,28 @@
     <title>Solustoc - Négoce & Déstockage B2B Vin</title>
     <script type="module" crossorigin src="./index-CiN389WB.js"></script>
     <link rel="stylesheet" crossorigin href="./index-BvEbwHs3.css">
+    <style>
+  /* Réduit toute section plein écran (Tailwind .h-screen, .min-h-screen, .h-svh) */
+  #root :is(.h-screen, .min-h-screen, .h-svh),
+  #root :is([class*="h-screen"], [class*="min-h-screen"], [class*="h-svh"]) {
+    height: 50vh !important;
+    min-height: 50vh !important;
+  }
+
+  /* Réduit les gros espacements verticaux courants (py-24/32/40…) */
+  #root :is(.py-24, .py-28, .py-32, .py-36, .py-40) {
+    padding-top: 4rem !important;
+    padding-bottom: 4rem !important;
+  }
+
+  /* Sécurité : force la réduction sur les 2 premières sections visibles */
+  #root section:nth-of-type(1),
+  #root section:nth-of-type(2) {
+    min-height: 50vh !important;
+    padding-top: 3rem !important;
+    padding-bottom: 3rem !important;
+  }
+</style>
   </head>
   <body>
     <div id="root"></div>
