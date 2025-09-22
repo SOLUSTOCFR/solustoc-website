@@ -134,5 +134,58 @@
         }
       })();
     </script>
+    <!-- Liens légaux dans le footer : CGV & Politique de confidentialité -->
+<script>
+(function () {
+  function addLegalLinks() {
+    const root = document.getElementById('root');
+    if (!root) return;
+
+    // Évite les doublons si le script est relancé
+    if (root.querySelector('.legal-links')) return;
+
+    // On prend le footer existant s'il y en a un, sinon on en crée un
+    let footer = root.querySelector('footer');
+    if (!footer) {
+      footer = document.createElement('footer');
+      footer.style.padding = '1.25rem';
+      footer.style.marginTop = '2rem';
+      footer.style.borderTop = '1px solid rgba(0,0,0,0.08)';
+      root.appendChild(footer);
+    }
+
+    // Bloc de liens
+    const wrap = document.createElement('div');
+    wrap.className = 'legal-links';
+    wrap.style.display = 'flex';
+    wrap.style.justifyContent = 'center';
+    wrap.style.flexWrap = 'wrap';
+    wrap.style.gap = '1rem';
+    wrap.style.fontSize = '0.9rem';
+    wrap.style.opacity = '0.9';
+
+    const mk = (href, text) => {
+      const a = document.createElement('a');
+      a.href = href;
+      a.textContent = text;
+      a.target = '_blank';
+      a.rel = 'noopener noreferrer';
+      a.style.textDecoration = 'underline';
+      return a;
+    };
+
+    wrap.appendChild(mk('https://solustoc.com/cgv/', 'CGV'));
+    wrap.appendChild(mk('https://solustoc.com/politique-de-confidentialite-2/', 'Politique de confidentialité'));
+
+    footer.appendChild(wrap);
+  }
+
+  // Après chargement + réapplique si React re-render
+  window.addEventListener('load', addLegalLinks);
+  const mo = new MutationObserver(() => addLegalLinks());
+  mo.observe(document.documentElement, { childList: true, subtree: true });
+})();
+</script>
+
   </body>
 </html>
