@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <!-- Nouveau favicon (depuis solustoc.com) -->
+    <!-- Favicon -->
     <link rel="icon" href="https://solustoc.com/wp-content/uploads/2025/03/cropped-logo-solu-stoc-scaled-1.jpg?v=2" type="image/jpeg" />
     <link rel="shortcut icon" href="https://solustoc.com/wp-content/uploads/2025/03/cropped-logo-solu-stoc-scaled-1.jpg?v=2" type="image/jpeg" />
     <link rel="apple-touch-icon" href="https://solustoc.com/wp-content/uploads/2025/03/cropped-logo-solu-stoc-scaled-1.jpg?v=2" />
@@ -134,17 +134,24 @@
       })();
     </script>
 
-    <!-- Liens légaux dans le footer : CGV & Politique de confidentialité -->
+    <!-- Footer: met à jour (ou crée) les liens Services + ajoute CGV / Politique, sans doublon -->
     <script>
       (function () {
-        function addLegalLinks() {
+        const norm = s =>
+          (s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+
+        const SERVICES = [
+          { text: 'Revalorisation de lots', href: '/revalorisation.html' },
+          { text: 'Mise en relation B2B', href: '/mise-en-relation-b2b.html' },
+          { text: 'Conseil en négoce', href: '/conseil-negoce.html' },
+          { text: 'Solutions discrètes', href: '/solutions-discretes.html' },
+        ];
+
+        function upsertLinks() {
           const root = document.getElementById('root');
           if (!root) return;
 
-          // Évite les doublons si déjà injecté
-          if (root.querySelector('.legal-links')) return;
-
-          // Récupérer le footer existant ou en créer un
+          // Récupérer le footer existant, sinon créer
           let footer = root.querySelector('footer');
           if (!footer) {
             footer = document.createElement('footer');
@@ -154,33 +161,100 @@
             root.appendChild(footer);
           }
 
-          const wrap = document.createElement('div');
-          wrap.className = 'legal-links';
-          wrap.style.display = 'flex';
-          wrap.style.justifyContent = 'center';
-          wrap.style.flexWrap = 'wrap';
-          wrap.style.gap = '1rem';
-          wrap.style.fontSize = '0.9rem';
-          wrap.style.opacity = '0.9';
+          // 1) SERVICES : met à jour les liens existants par leur texte, sinon crée un bloc
+          let svcWrap = footer.querySelector('.service-links');
+          if (!svcWrap) {
+            // Cherche s'il y a déjà des ancres avec ces textes quelque part dans le footer
+            const allA = Array.from(footer.querySelectorAll('a'));
+            const found = SERVICES.map(item => {
+              const matches = allA.filter(a => norm(a.textContent) === norm(item.text));
+              // si plusieurs, on garde la première et on supprime les doublons
+              if (matches.length > 1) {
+                matches.slice(1).forEach(d => d.remove());
+              }
+              if (matches[0]) {
+                matches[0].setAttribute('href', item.href);
+                return matches[0];
+              }
+              return null;
+            });
 
-          const mk = (href, text) => {
-            const a = document.createElement('a');
-            a.href = href;
-            a.textContent = text;
-            a.target = '_blank';
-            a.rel = 'noopener noreferrer';
-            a.style.textDecoration = 'underline';
-            return a;
-          };
+            // S'il manque au moins un lien, on crée le conteneur et on ajoute les manquants
+            if (found.some(el => !el)) {
+              svcWrap = document.createElement('div');
+              svcWrap.className = 'service-links';
+              svcWrap.style.display = 'flex';
+              svcWrap.style.justifyContent = 'center';
+              svcWrap.style.flexWrap = 'wrap';
+              svcWrap.style.gap = '1rem';
+              svcWrap.style.fontSize = '0.95rem';
 
-          wrap.appendChild(mk('https://solustoc.com/cgv/', 'CGV'));
-          wrap.appendChild(mk('https://solustoc.com/politique-de-confidentialite-2/', 'Politique de confidentialité'));
+              SERVICES.forEach((item, idx) => {
+                const el = found[idx];
+                if (el) {
+                  // s'il existe déjà (corrigé), on l’insère dans l’ordre
+                  svcWrap.appendChild(el);
+                } else {
+                  const a = document.createElement('a');
+                  a.textContent = item.text;
+                  a.href = item.href;
+                  a.style.textDecoration = 'underline';
+                  svcWrap.appendChild(a);
+                }
+              });
 
-          footer.appendChild(wrap);
+              // placer les services en tête du footer (avant les liens légaux)
+              footer.prepend(svcWrap);
+            }
+          } else {
+            // Met à jour les href et enlève doublons à l'intérieur du bloc
+            SERVICES.forEach(item => {
+              const matches = Array.from(svcWrap.querySelectorAll('a'))
+                .filter(a => norm(a.textContent) === norm(item.text));
+              if (matches.length) {
+                matches[0].setAttribute('href', item.href);
+                matches.slice(1).forEach(d => d.remove());
+              } else {
+                const a = document.createElement('a');
+                a.textContent = item.text;
+                a.href = item.href;
+                a.style.textDecoration = 'underline';
+                svcWrap.appendChild(a);
+              }
+            });
+          }
+
+          // 2) LIENS LÉGAUX : ajoute une seule fois
+          if (!footer.querySelector('.legal-links')) {
+            const legal = document.createElement('div');
+            legal.className = 'legal-links';
+            legal.style.display = 'flex';
+            legal.style.justifyContent = 'center';
+            legal.style.flexWrap = 'wrap';
+            legal.style.gap = '1rem';
+            legal.style.fontSize = '0.9rem';
+            legal.style.opacity = '0.9';
+            const mk = (href, text) => {
+              const a = document.createElement('a');
+              a.href = href;
+              a.textContent = text;
+              a.target = '_blank';
+              a.rel = 'noopener noreferrer';
+              a.style.textDecoration = 'underline';
+              return a;
+            };
+            legal.appendChild(mk('https://solustoc.com/cgv/', 'CGV'));
+            legal.appendChild(mk('https://solustoc.com/politique-de-confidentialite-2/', 'Politique de confidentialité'));
+            footer.appendChild(legal);
+          }
         }
 
-        window.addEventListener('load', addLegalLinks);
-        const mo = new MutationObserver(() => addLegalLinks());
+        // Lance et réapplique si React modifie le DOM
+        window.addEventListener('load', () => {
+          upsertLinks();
+          setTimeout(upsertLinks, 200);
+        });
+        const mo = new MutationObserver(() => upsertLinks());
         mo.observe(document.documentElement, { childList: true, subtree: true });
       })();
     </script>
