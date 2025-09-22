@@ -1,4 +1,4 @@
-<!doctype html>
+<!doctype html> 
 <html lang="fr">
   <head>
     <meta charset="UTF-8" />
@@ -37,20 +37,148 @@
     }
     </script>
 
-    <!-- Mise en page légère (structure seulement, pas de couleurs) -->
+    <!-- Thème Solustoc (style chaleureux, scoped) -->
     <style>
-      body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;line-height:1.6}
-      .container{max-width:1100px;margin:0 auto;padding:24px}
-      header.page{padding:24px 0;border-bottom:1px solid #eee}
-      header.page .crumbs a{text-decoration:underline}
-      .grid{display:grid;gap:20px}
-      @media(min-width:900px){.grid{grid-template-columns:1.2fr .8fr}}
-      .card{border:1px solid #eee;border-radius:14px;padding:18px;background:#fff}
-      .muted{opacity:.9}
-      /* bouton local qui sera "skinné" automatiquement comme le bouton principal de la home */
-      .btn-primary{display:inline-block;padding:12px 18px;border-radius:10px;text-decoration:none;cursor:pointer}
-      /* footer placeholder (sera remplacé par le footer de la home) */
-      footer.placeholder{opacity:.3}
+      :root {
+        --svc-bg: #faf7f5;
+        --svc-surface: #ffffff;
+        --svc-border: #efe7e2;
+        --svc-accent: #7b2c2c;      /* bordeaux */
+        --svc-accent-2: #c99a5b;    /* doré */
+        --svc-ink: #231f20;
+      }
+
+      body { 
+        font-family: system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+        line-height: 1.6;
+        color: var(--svc-ink);
+        background:
+          radial-gradient(1200px 600px at 100% -10%, rgba(123,44,44,.06), transparent 60%),
+          radial-gradient(1000px 500px at -10% 110%, rgba(201,154,91,.07), transparent 60%),
+          var(--svc-bg);
+      }
+
+      /* Conteneur et grille */
+      .container { max-width: 1100px; margin: 0 auto; padding: 28px 24px; }
+      .grid { display: grid; gap: 22px; }
+      @media (min-width: 900px) { .grid { grid-template-columns: 1.2fr .8fr; } }
+
+      /* En-tête de page (plus “hero-lite”) */
+      header.page {
+        padding: 28px 0 24px;
+        border-bottom: 1px solid var(--svc-border);
+        background:
+          linear-gradient(to right, rgba(123,44,44,.06), rgba(201,154,91,.04));
+      }
+      header.page .crumbs a {
+        text-decoration: none;
+        color: var(--svc-accent);
+        font-weight: 600;
+      }
+      header.page .crumbs a:hover { text-decoration: underline; }
+      header.page h1 {
+        margin: 10px 0 4px;
+        font-size: clamp(1.9rem, 2.8vw, 2.4rem);
+        line-height: 1.25;
+        letter-spacing: .2px;
+        color: #120b0b;
+        position: relative;
+        display: inline-block;
+      }
+      header.page h1::after {
+        content: "";
+        display: block;
+        height: 3px;
+        width: 72px;
+        margin-top: 8px;
+        background: linear-gradient(90deg, var(--svc-accent), var(--svc-accent-2));
+        border-radius: 3px;
+      }
+      .muted { opacity: .9; }
+
+      /* Cartes élégantes */
+      .card {
+        border: 1px solid var(--svc-border);
+        border-radius: 16px;
+        padding: 20px;
+        background: var(--svc-surface);
+        box-shadow:
+          0 10px 24px rgba(0,0,0,.06),
+          0 1px 0 rgba(255,255,255,.5) inset;
+        transition: transform .2s ease, box-shadow .2s ease;
+      }
+      .card:hover {
+        transform: translateY(-2px);
+        box-shadow:
+          0 14px 34px rgba(0,0,0,.08),
+          0 1px 0 rgba(255,255,255,.5) inset;
+      }
+
+      /* Titres de section avec soulignement dégradé */
+      .card h2, .card h3 {
+        margin-top: 4px;
+        margin-bottom: 10px;
+        line-height: 1.25;
+      }
+      .card h2 {
+        font-size: clamp(1.25rem, 2vw, 1.5rem);
+        position: relative;
+        padding-bottom: 6px;
+      }
+      .card h2::after {
+        content: "";
+        display: block;
+        height: 2px;
+        width: 56px;
+        margin-top: 8px;
+        background: linear-gradient(90deg, var(--svc-accent), var(--svc-accent-2));
+        border-radius: 2px;
+      }
+      .card h3 { font-size: clamp(1.05rem, 1.6vw, 1.2rem); }
+
+      /* Listes — puces colorées et espacées */
+      .card ul { padding-left: 1.1rem; margin: 0; }
+      .card li { margin: 6px 0; }
+      .card li::marker { color: var(--svc-accent); }
+
+      /* CTA local (fallback si la copie de style de la home échoue) */
+      .btn-primary {
+        display: inline-block;
+        padding: 12px 18px;
+        border-radius: 12px;
+        text-decoration: none;
+        cursor: pointer;
+        background: linear-gradient(135deg, var(--svc-accent), #5f1f1f);
+        color: #fff;
+        box-shadow: 0 6px 18px rgba(123,44,44,.25);
+        border: 1px solid rgba(255,255,255,.08);
+        transition: transform .15s ease, box-shadow .2s ease, filter .2s ease;
+      }
+      .btn-primary:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 10px 24px rgba(123,44,44,.28);
+        filter: brightness(1.02);
+      }
+
+      /* Champs du formulaire */
+      #contact label { font-weight: 600; }
+      #contact input, #contact textarea {
+        width: 100%;
+        padding: 12px;
+        margin: 6px 0 14px;
+        border: 1px solid var(--svc-border);
+        border-radius: 10px;
+        background: #fff;
+        transition: border-color .15s ease, box-shadow .15s ease;
+      }
+      #contact input:focus, #contact textarea:focus {
+        outline: none;
+        border-color: var(--svc-accent-2);
+        box-shadow: 0 0 0 4px rgba(201,154,91,.15);
+      }
+
+      /* Footer placeholder (en attendant la copie de la home) */
+      footer.placeholder { opacity: .45; }
     </style>
   </head>
   <body>
@@ -58,7 +186,7 @@
     <header class="page">
       <div class="container">
         <div class="crumbs"><a href="/" title="Accueil">← Retour à l’accueil</a></div>
-        <h1 style="margin:8px 0 0">Revalorisation de lots</h1>
+        <h1>Revalorisation de lots</h1>
         <p class="muted">Nous aidons les professionnels à <strong>repositionner</strong> et <strong>écouler</strong> leurs stocks en préservant la marge et l’image.</p>
       </div>
     </header>
@@ -72,6 +200,7 @@
             <li>Repackaging, étiquetage et assortiments pour raviver l’intérêt.</li>
             <li>Négociation et placements discrets en France et à l’export.</li>
           </ul>
+          <p><a class="btn-primary" id="page-cta" href="#contact">Nous contacter</a></p>
         </section>
 
         <aside class="card">
@@ -90,13 +219,13 @@
         <form action="https://formspree.io/f/mrbyzegw" method="POST">
           <input type="hidden" name="_subject" value="Contact Revalorisation – Solustoc" />
           <label for="name">Nom</label>
-          <input type="text" id="name" name="name" required style="width:100%;padding:10px;margin:6px 0 12px;border:1px solid #ccc;border-radius:8px;" />
+          <input type="text" id="name" name="name" required />
 
           <label for="email">Email</label>
-          <input type="email" id="email" name="email" required style="width:100%;padding:10px;margin:6px 0 12px;border:1px solid #ccc;border-radius:8px;" />
+          <input type="email" id="email" name="email" required />
 
           <label for="message">Votre message</label>
-          <textarea id="message" name="message" required rows="5" style="width:100%;padding:10px;margin:6px 0 12px;border:1px solid #ccc;border-radius:8px;"></textarea>
+          <textarea id="message" name="message" required rows="5"></textarea>
 
           <button type="submit" class="btn-primary">Envoyer</button>
         </form>
@@ -157,16 +286,14 @@
                 return t.includes('demander un echange') || t.includes('demander un échange') || t.includes('decouvrir nos services') || t.includes('découvrir nos services');
               });
 
-              // Appliquer le style sur les boutons de cette page
+              // Appliquer le style sur les boutons de cette page (fallback seulement)
               const dstBtns = document.querySelectorAll('.btn-primary');
               if (srcBtn && dstBtns.length) {
                 dstBtns.forEach(b => copyButtonStyle(srcBtn, b));
               }
             } catch (e) {
-              // En cas de pépin, on ne casse rien : on garde le footer de secours
               console.warn('Footer/style copy failed:', e);
             } finally {
-              // Nettoyage
               setTimeout(()=> ifr.remove(), 100);
             }
           });
