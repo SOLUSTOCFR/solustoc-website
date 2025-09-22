@@ -13,7 +13,7 @@
 
     <!-- SEO -->
     <title>Revalorisation de lots – Solustoc</title>
-    <meta name="description" content="Revalorisez vos stocks de vin en B2B avec Solustoc : audit, repositionnement, et écoulement discrets en France et à l’export." />
+    <meta name="description" content="Revalorisez vos stocks de vin en B2B avec Solustoc : audit, repositionnement et écoulement discrets en France et à l’export." />
     <link rel="canonical" href="https://solustoc.fr/revalorisation.html" />
     <meta name="robots" content="index,follow" />
 
@@ -37,56 +37,49 @@
     }
     </script>
 
-    <!-- Mise en page légère (structure seulement, pas de couleurs) -->
+    <!-- Mise en page légère pour le contenu (pas de couleurs, on laisse la charte de la home gérer via le hero/footers clonés) -->
     <style>
       body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;line-height:1.6}
       .container{max-width:1100px;margin:0 auto;padding:24px}
-      header.page{padding:24px 0;border-bottom:1px solid #eee}
-      header.page .crumbs a{text-decoration:underline}
-      .grid{display:grid;gap:20px}
-      @media(min-width:900px){.grid{grid-template-columns:1.2fr .8fr}}
-      .card{border:1px solid #eee;border-radius:14px;padding:18px;background:#fff}
+      .content{margin: 32px 0}
+      .content h2{margin-top:24px}
+      .card{border:1px solid #eee;border-radius:14px;padding:18px;background:#fff;margin-top:16px}
       .muted{opacity:.9}
-      /* bouton local qui sera "skinné" automatiquement comme le bouton principal de la home */
-      .btn-primary{display:inline-block;padding:12px 18px;border-radius:10px;text-decoration:none;cursor:pointer}
-      /* footer placeholder (sera remplacé par le footer de la home) */
       footer.placeholder{opacity:.3}
     </style>
   </head>
   <body>
 
-    <header class="page">
-      <div class="container">
-        <div class="crumbs"><a href="/" title="Accueil">← Retour à l’accueil</a></div>
-        <h1 style="margin:8px 0 0">Revalorisation de lots</h1>
+    <!-- HERO (sera copié depuis la home pour garder exactement le même look) -->
+    <section id="hero-host"></section>
+
+    <!-- Contenu spécifique Revalorisation -->
+    <main class="container content">
+      <header>
+        <h1>Revalorisation de lots</h1>
         <p class="muted">Nous aidons les professionnels à <strong>repositionner</strong> et <strong>écouler</strong> leurs stocks en préservant la marge et l’image.</p>
-      </div>
-    </header>
+      </header>
 
-    <main class="container">
-      <div class="grid">
-        <section class="card">
-          <h2>Ce que nous faisons</h2>
-          <ul>
-            <li>Audit rapide du stock (volumes, DO/IGP, millésimes, prix, circuits possibles).</li>
-            <li>Repackaging, étiquetage et assortiments pour raviver l’intérêt.</li>
-            <li>Négociation et placements discrets en France et à l’export.</li>
-          </ul>
-          <p><a class="btn-primary" id="page-cta" href="#contact">Nous contacter</a></p>
-        </section>
+      <section class="card">
+        <h2>Ce que nous faisons</h2>
+        <ul>
+          <li>Audit rapide du stock (volumes, DO/IGP, millésimes, prix, circuits possibles).</li>
+          <li>Repackaging, étiquetage et assortiments pour raviver l’intérêt.</li>
+          <li>Négociation et placements discrets en France et à l’export.</li>
+        </ul>
+      </section>
 
-        <aside class="card">
-          <h3>Pourquoi Solustoc ?</h3>
-          <ul>
-            <li>Approche discrète & circuits maîtrisés.</li>
-            <li>Réseau B2B qualifié (cavistes, grossistes, CHR, export).</li>
-            <li>Priorité à la marge & à la protection d’image.</li>
-          </ul>
-        </aside>
-      </div>
+      <section class="card">
+        <h2>Pourquoi Solustoc ?</h2>
+        <ul>
+          <li>Approche discrète & circuits maîtrisés.</li>
+          <li>Réseau B2B qualifié (cavistes, grossistes, CHR, export).</li>
+          <li>Priorité à la marge & à la protection d’image.</li>
+        </ul>
+      </section>
 
       <!-- Formulaire (même endpoint que l’accueil) -->
-      <section id="contact" class="card" style="margin-top:24px;">
+      <section id="contact" class="card">
         <h2>Parlez-nous de vos lots</h2>
         <form action="https://formspree.io/f/mrbyzegw" method="POST">
           <input type="hidden" name="_subject" value="Contact Revalorisation – Solustoc" />
@@ -99,19 +92,20 @@
           <label for="message">Votre message</label>
           <textarea id="message" name="message" required rows="5" style="width:100%;padding:10px;margin:6px 0 12px;border:1px solid #ccc;border-radius:8px;"></textarea>
 
-          <button type="submit" class="btn-primary">Envoyer</button>
+          <button type="submit" id="submit-btn">Envoyer</button>
         </form>
       </section>
     </main>
 
-    <!-- Footer de secours (bref) en attendant la copie du footer de la home ; remplacé au chargement -->
+    <!-- Footer de secours (remplacé par le footer de la home au chargement) -->
     <footer class="placeholder">
       <div class="container"><small>© Solustoc</small></div>
     </footer>
 
-    <!-- Script : copie le FOOTER et le STYLE du bouton depuis la home (même domaine) -->
+    <!-- Script : clone le HERO et le FOOTER depuis la home (même domaine) + applique le style du bouton principal au bouton "Envoyer" -->
     <script>
       (function () {
+        function norm(s){return (s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/\s+/g,' ').trim();}
         function copyButtonStyle(fromEl, toEl) {
           if (!fromEl || !toEl) return;
           const cs = getComputedStyle(fromEl);
@@ -123,12 +117,11 @@
             'transition','filter'
           ];
           props.forEach(p => { try { toEl.style[p] = cs[p]; } catch(e){} });
+          toEl.style.cursor = 'pointer';
         }
 
-        function norm(s){return (s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/\s+/g,' ').trim();}
-
         window.addEventListener('load', function(){
-          // 1) Charge la home dans un iframe caché
+          // Charge la home en cache
           const ifr = document.createElement('iframe');
           ifr.src = '/';
           ifr.style.position = 'fixed';
@@ -142,32 +135,51 @@
             try {
               const doc = ifr.contentDocument || ifr.contentWindow.document;
 
-              // (A) Copier le FOOTER tel quel
+              // === HERO : cherche un bloc qui contient "Solutions Discr" et les deux CTA ===
+              const cands = Array.from(doc.querySelectorAll('section, header, main section, div'));
+              function looksLikeHero(el){
+                const t = norm(el.textContent);
+                const hasTitle = t.includes('solutions discretes') || t.includes('solutions discr') || t.includes('votre negoce de vin');
+                const hasCta1 = t.includes('demander un echange') || t.includes('demander un échange');
+                const hasCta2 = t.includes('decouvrir nos services') || t.includes('découvrir nos services');
+                return hasTitle && hasCta1 && hasCta2;
+              }
+              let hero = cands.find(looksLikeHero);
+              if (!hero) {
+                // fallback : plus grand bloc proche du haut
+                const nearTop = cands.filter(el => el.getBoundingClientRect().top < 600);
+                hero = nearTop.sort((a,b)=> b.getBoundingClientRect().height - a.getBoundingClientRect().height)[0];
+              }
+              if (hero) {
+                const clone = hero.cloneNode(true);
+                const host = document.getElementById('hero-host');
+                host.appendChild(clone);
+              }
+
+              // === FOOTER : clone tel quel ===
               const homeFooter = doc.querySelector('footer');
               if (homeFooter) {
                 const localFooter = document.querySelector('footer');
-                const clone = homeFooter.cloneNode(true);
-                if (localFooter) localFooter.replaceWith(clone);
-                else document.body.appendChild(clone);
+                const cloneF = homeFooter.cloneNode(true);
+                if (localFooter) localFooter.replaceWith(cloneF);
+                else document.body.appendChild(cloneF);
               }
 
-              // (B) Récupérer le style d’un bouton principal de la home
+              // === STYLE du bouton principal appliqué au bouton "Envoyer" ===
               const buttons = Array.from(doc.querySelectorAll('a,button,[role="button"]'));
               const srcBtn = buttons.find(el=>{
                 const t = norm(el.textContent);
-                return t.includes('demander un echange') || t.includes('demander un échange') || t.includes('decouvrir nos services') || t.includes('découvrir nos services');
+                return t.includes('demander un echange') || t.includes('demander un échange');
+              }) || buttons.find(el=>{
+                const t = norm(el.textContent);
+                return t.includes('decouvrir nos services') || t.includes('découvrir nos services');
               });
+              const dstBtn = document.getElementById('submit-btn');
+              if (srcBtn && dstBtn) copyButtonStyle(srcBtn, dstBtn);
 
-              // Appliquer le style sur les boutons de cette page
-              const dstBtns = document.querySelectorAll('.btn-primary');
-              if (srcBtn && dstBtns.length) {
-                dstBtns.forEach(b => copyButtonStyle(srcBtn, b));
-              }
             } catch (e) {
-              // En cas de pépin, on ne casse rien : on garde le footer de secours
-              console.warn('Footer/style copy failed:', e);
+              console.warn('Clone hero/footer failed:', e);
             } finally {
-              // Nettoyage
               setTimeout(()=> ifr.remove(), 100);
             }
           });
