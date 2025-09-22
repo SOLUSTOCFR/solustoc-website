@@ -7,44 +7,70 @@
     <title>Solustoc - Négoce & Déstockage B2B Vin</title>
     <script type="module" crossorigin src="./index-CiN389WB.js"></script>
     <link rel="stylesheet" crossorigin href="./index-BvEbwHs3.css">
-   
   </head>
   <body>
     <div id="root"></div>
+
+    <!-- Réduction des 2 gros blocs du haut à ~35vh -->
     <script>
-  (function () {
-    function shrinkTopBlocks() {
-      const root = document.getElementById('root');
-      if (!root) return;
+      (function () {
+        function applyShrink(el) {
+          if (!el) return;
+          el.style.setProperty('min-height', '40vh', 'important');
+          el.style.setProperty('height', '40vh', 'important');
+          el.style.setProperty('padding-top', '3rem', 'important');
+          el.style.setProperty('padding-bottom', '3rem', 'important');
+          el.style.setProperty('overflow', 'hidden', 'important');
+        }
 
-      // On cherche les sections/blocs très hauts, on en réduit 2 au max
-      const candidates = root.querySelectorAll('section, header, main > section, div');
-      const tall = [];
-      candidates.forEach(el => {
-        const h = el.getBoundingClientRect().height;
-        if (h >= window.innerHeight * 0.8) tall.push(el);
-      });
+        function shrinkTopBlocks() {
+          const rootEl = document.getElementById('root');
+          if (!rootEl) return;
 
-      tall.slice(0, 2).forEach(el => {
-        el.style.setProperty('min-height', '35vh', 'important');
-        el.style.setProperty('height', '35vh', 'important');
-        el.style.setProperty('padding-top', '3rem', 'important');
-        el.style.setProperty('padding-bottom', '3rem', 'important');
-        el.style.setProperty('overflow', 'hidden', 'important');
-      });
-    }
+          // 1) Cible prioritaire : bloc contenant le texte “Solution Discrète”
+          // (au cas où on puisse l’identifier directement)
+          const allBlocks = rootEl.querySelectorAll('section, header, main section, div');
+          let targeted = [];
+          allBlocks.forEach(el => {
+            const txt = (el.textContent || '').toLowerCase();
+            if (txt.includes('solution discr') || txt.includes('solustoc')) {
+              targeted.push(el);
+            }
+          });
 
-    // Quand la page est chargée
-    window.addEventListener('load', shrinkTopBlocks);
+          // 2) Sinon, on détecte les blocs très hauts (>= 80% de la hauteur écran)
+          if (targeted.length === 0) {
+            const tall = [];
+            allBlocks.forEach(el => {
+              const h = el.getBoundingClientRect().height;
+              if (h >= window.innerHeight * 0.8) tall.push(el);
+            });
+            targeted = tall.slice(0, 2);
+          } else {
+            targeted = targeted.slice(0, 2);
+          }
 
-    // Si React réinjecte du contenu après coup, on ré-applique
-    const root = document.getElementById('root');
-    if (root) {
-      const mo = new MutationObserver(() => shrinkTopBlocks());
-      mo.observe(root, { childList: true, subtree: true });
-    }
-  })();
-</script>
+          targeted.forEach(applyShrink);
+        }
 
+        // Lance après le chargement + une frame pour laisser React rendre
+        window.addEventListener('load', () => {
+          requestAnimationFrame(shrinkTopBlocks);
+          // seconde passe après 300ms en cas de rendu différé
+          setTimeout(shrinkTopBlocks, 300);
+        });
+
+        // Si React modifie le DOM ensuite, on ré-applique
+        const rootEl = document.getElementById('root');
+        if (rootEl) {
+          let t;
+          const mo = new MutationObserver(() => {
+            clearTimeout(t);
+            t = setTimeout(shrinkTopBlocks, 50);
+          });
+          mo.observe(rootEl, { childList: true, subtree: true });
+        }
+      })();
+    </script>
   </body>
 </html>
