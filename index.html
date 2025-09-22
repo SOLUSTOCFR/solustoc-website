@@ -18,7 +18,7 @@
           const root = document.getElementById('root');
           if (!root) return;
 
-          // On cible les blocs proches du haut de page
+          // Cible les blocs proches du haut de page
           const nodes = Array.from(
             root.querySelectorAll('section, header, main section, div')
           ).filter(el => el.getBoundingClientRect().top < window.innerHeight * 0.4);
@@ -29,9 +29,9 @@
           );
 
           // 2) Sinon, un bloc avec classes plein écran (Tailwind-like)
-          if (!hero) hero = nodes.find(el => /\b(min-)?h-(screen|svh)\b/.test(el.className));
+          if (!hero) hero = nodes.find(el => /\b(min-)?h-(screen|svh)\b/.test(el.className || ''));
 
-          // 3) Sinon, on prend le plus grand parmi les premiers candidats
+          // 3) Sinon, le plus grand parmi les premiers candidats
           if (!hero) {
             hero = nodes.sort(
               (a, b) => b.getBoundingClientRect().height - a.getBoundingClientRect().height
@@ -39,8 +39,8 @@
           }
           if (!hero) return;
 
-          // Retrait des classes plein écran si présentes
-          hero.className = hero.className
+          // Retire les classes plein écran si présentes
+          hero.className = (hero.className || '')
             .replace(/\bmin-h-screen\b/g, '')
             .replace(/\bh-screen\b/g, '')
             .replace(/\bmin-h-svh\b/g, '')
@@ -66,6 +66,72 @@
           window.__shr_to = setTimeout(shrinkHero, 60);
         });
         mo.observe(document.documentElement, { childList: true, subtree: true });
+      })();
+    </script>
+
+    <!-- Uniformise la couleur/visuel de "Découvrir nos services" sur "Demander un échange" -->
+    <script>
+      (function () {
+        const norm = s =>
+          (s || '')
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .toLowerCase()
+            .replace(/\s+/g, ' ')
+            .trim();
+
+        function equalizeButtons() {
+          const root = document.getElementById('root');
+          if (!root) return;
+
+          const candidates = root.querySelectorAll('button, a, [role="button"]');
+
+          const findByText = (needle) => {
+            const n = norm(needle);
+            for (const el of candidates) {
+              const t = norm(el.textContent);
+              if (t.includes(n)) return el;
+            }
+            return null;
+          };
+
+          // Source (style à copier)
+          const src =
+            findByText('demander un echange') || findByText('demander un échange');
+
+          // Cible (à recolorer)
+          const dst =
+            findByText('decouvrir nos services') || findByText('découvrir nos services');
+
+          if (src && dst) {
+            const cs = getComputedStyle(src);
+            const props = [
+              'background','backgroundColor','backgroundImage','backgroundSize','backgroundPosition','backgroundRepeat',
+              'border','borderColor','borderStyle','borderWidth','borderRadius','boxShadow',
+              'color','textTransform','letterSpacing','fontWeight',
+              'padding','paddingTop','paddingBottom','paddingLeft','paddingRight',
+              'transition','filter'
+            ];
+            props.forEach(p => { try { dst.style[p] = cs[p]; } catch(e){} });
+            dst.style.cursor = 'pointer';
+          }
+        }
+
+        window.addEventListener('load', () => {
+          equalizeButtons();
+          setTimeout(equalizeButtons, 200);
+        });
+
+        // Ré-applique si le DOM change (navigations internes, re-render, etc.)
+        const root = document.getElementById('root');
+        if (root) {
+          let t;
+          const mo = new MutationObserver(() => {
+            clearTimeout(t);
+            t = setTimeout(equalizeButtons, 60);
+          });
+          mo.observe(root, { childList: true, subtree: true });
+        }
       })();
     </script>
   </body>
