@@ -174,5 +174,52 @@
         mo.observe(document.documentElement, { childList: true, subtree: true });
       })();
     </script>
+    <!-- Liens services dans le footer (accueil) -->
+<script>
+(function () {
+  function addServiceLinks() {
+    const root = document.getElementById('root');
+    if (!root) return;
+
+    let footer = root.querySelector('footer');
+    if (!footer) {
+      footer = document.createElement('footer');
+      footer.style.padding = '1.25rem';
+      footer.style.marginTop = '2rem';
+      footer.style.borderTop = '1px solid rgba(0,0,0,0.08)';
+      root.appendChild(footer);
+    }
+
+    if (footer.querySelector('.service-links')) return;
+
+    const wrap = document.createElement('div');
+    wrap.className = 'service-links';
+    wrap.style.display = 'flex';
+    wrap.style.justifyContent = 'center';
+    wrap.style.flexWrap = 'wrap';
+    wrap.style.gap = '1rem';
+    wrap.style.fontSize = '0.95rem';
+
+    const mk = (href, text) => {
+      const a = document.createElement('a');
+      a.href = href;
+      a.textContent = text;
+      a.style.textDecoration = 'underline';
+      return a;
+    };
+
+    wrap.appendChild(mk('/revalorisation.html', 'Revalorisation de lots'));
+    wrap.appendChild(mk('/mise-en-relation-b2b.html', 'Mise en relation B2B'));
+    wrap.appendChild(mk('/conseil-negoce.html', 'Conseil en négoce'));
+    wrap.appendChild(mk('/solutions-discretes.html', 'Solutions discrètes'));
+
+    footer.prepend(wrap); // avant les liens légaux
+  }
+
+  window.addEventListener('load', addServiceLinks);
+  new MutationObserver(addServiceLinks).observe(document.documentElement, { childList: true, subtree: true });
+})();
+</script>
+
   </body>
 </html>
