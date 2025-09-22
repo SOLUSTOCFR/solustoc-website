@@ -8,11 +8,77 @@
     <link rel="apple-touch-icon" href="https://solustoc.com/wp-content/uploads/2025/03/cropped-logo-solu-stoc-scaled-1.jpg?v=2" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Solustoc - Négoce & Déstockage B2B Vin</title>
+
+    <!-- Ton site (ordre d’origine) -->
     <script type="module" crossorigin src="./index-CiN389WB.js"></script>
     <link rel="stylesheet" crossorigin href="./index-BvEbwHs3.css">
+
+    <!-- Barre de navigation (styles) -->
+    <style>
+      /* Barre de navigation SOLUSTOC */
+      .site-nav {
+        position: sticky; top: 0; z-index: 50;
+        background: rgba(255,255,255,.9);
+        backdrop-filter: blur(6px);
+        border-bottom: 1px solid rgba(0,0,0,.06);
+      }
+      .site-nav .bar {
+        max-width: 1100px; margin: 0 auto;
+        padding: 10px 16px;
+        display: flex; align-items: center; justify-content: space-between; gap: 12px;
+      }
+      .site-nav .brand a {
+        font-weight: 800; letter-spacing: .5px;
+        color: #7b2c2c; text-decoration: none;
+      }
+      .site-nav .links { display: flex; gap: 14px; flex-wrap: wrap; }
+      .site-nav .links a {
+        color: #1d1d1f; text-decoration: none;
+        padding: 8px 10px; border-radius: 10px;
+        transition: background .15s ease, color .15s ease, transform .05s ease;
+      }
+      .site-nav .links a:hover {
+        background: rgba(123,44,44,.08); color: #7b2c2c;
+        transform: translateY(-1px);
+      }
+      /* Lien actif */
+      .site-nav .links a[aria-current="page"] {
+        background: rgba(123,44,44,.10);
+        color: #7b2c2c;
+      }
+      @media (max-width: 640px) {
+        .site-nav .links { gap: 8px; }
+        .site-nav .links a { padding: 8px; font-size: .95rem; }
+      }
+    </style>
   </head>
   <body>
+
+    <!-- NAVBAR ajoutée -->
+    <nav class="site-nav" aria-label="Navigation principale">
+      <div class="bar">
+        <div class="brand"><a href="/">SOLUSTOC</a></div>
+        <div class="links">
+          <a href="/revalorisation.html">Revalorisation de lots</a>
+          <a href="/mise-en-relation-b2b.html">Mise en relation B2B</a>
+          <a href="/conseil-negoce.html">Conseil en négoce</a>
+          <a href="/solutions-discretes.html">Solutions discrètes</a>
+        </div>
+      </div>
+    </nav>
+
     <div id="root"></div>
+
+    <!-- Active le lien courant dans la nav -->
+    <script>
+      (function () {
+        const path = location.pathname.replace(/\/+$/, '') || '/';
+        document.querySelectorAll('.site-nav .links a').forEach(a => {
+          const href = (a.getAttribute('href') || '').replace(/\/+$/, '') || '/';
+          if (href === path) a.setAttribute('aria-current', 'page');
+        });
+      })();
+    </script>
 
     <!-- Réduction "safe" du bandeau à ~35vh (sans masquer le contenu suivant) -->
     <script>
@@ -164,11 +230,9 @@
           // 1) SERVICES : met à jour les liens existants par leur texte, sinon crée un bloc
           let svcWrap = footer.querySelector('.service-links');
           if (!svcWrap) {
-            // Cherche s'il y a déjà des ancres avec ces textes quelque part dans le footer
             const allA = Array.from(footer.querySelectorAll('a'));
             const found = SERVICES.map(item => {
               const matches = allA.filter(a => norm(a.textContent) === norm(item.text));
-              // si plusieurs, on garde la première et on supprime les doublons
               if (matches.length > 1) {
                 matches.slice(1).forEach(d => d.remove());
               }
@@ -179,7 +243,6 @@
               return null;
             });
 
-            // S'il manque au moins un lien, on crée le conteneur et on ajoute les manquants
             if (found.some(el => !el)) {
               svcWrap = document.createElement('div');
               svcWrap.className = 'service-links';
@@ -192,7 +255,6 @@
               SERVICES.forEach((item, idx) => {
                 const el = found[idx];
                 if (el) {
-                  // s'il existe déjà (corrigé), on l’insère dans l’ordre
                   svcWrap.appendChild(el);
                 } else {
                   const a = document.createElement('a');
@@ -203,11 +265,9 @@
                 }
               });
 
-              // placer les services en tête du footer (avant les liens légaux)
               footer.prepend(svcWrap);
             }
           } else {
-            // Met à jour les href et enlève doublons à l'intérieur du bloc
             SERVICES.forEach(item => {
               const matches = Array.from(svcWrap.querySelectorAll('a'))
                 .filter(a => norm(a.textContent) === norm(item.text));
@@ -249,7 +309,6 @@
           }
         }
 
-        // Lance et réapplique si React modifie le DOM
         window.addEventListener('load', () => {
           upsertLinks();
           setTimeout(upsertLinks, 200);
