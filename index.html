@@ -173,19 +173,15 @@
       a.style.textDecoration = 'underline';
       return a;
     };
-
     wrap.appendChild(mk('https://solustoc.com/cgv/', 'CGV'));
     wrap.appendChild(mk('https://solustoc.com/politique-de-confidentialite-2/', 'Politique de confidentialité'));
-
     footer.appendChild(wrap);
   }
-
   // Après chargement + réapplique si React re-render
   window.addEventListener('load', addLegalLinks);
   const mo = new MutationObserver(() => addLegalLinks());
   mo.observe(document.documentElement, { childList: true, subtree: true });
 })();
 </script>
-
   </body>
 </html>
