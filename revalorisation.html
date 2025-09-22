@@ -2,16 +2,12 @@
 <html lang="fr">
   <head>
     <meta charset="UTF-8" />
-    <!-- Favicon & assets identiques à la home -->
+    <!-- Favicon identique -->
     <link rel="icon" href="https://solustoc.com/wp-content/uploads/2025/03/cropped-logo-solu-stoc-scaled-1.jpg?v=2" type="image/jpeg" />
     <link rel="shortcut icon" href="https://solustoc.com/wp-content/uploads/2025/03/cropped-logo-solu-stoc-scaled-1.jpg?v=2" type="image/jpeg" />
     <link rel="apple-touch-icon" href="https://solustoc.com/wp-content/uploads/2025/03/cropped-logo-solu-stoc-scaled-1.jpg?v=2" />
+
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-
-    <!-- CSS global du site (même fichier que la home) -->
-    <link rel="stylesheet" crossorigin href="./index-BvEbwHs3.css" />
-
-    <!-- SEO -->
     <title>Revalorisation de lots – Solustoc</title>
     <meta name="description" content="Revalorisez vos stocks de vin en B2B avec Solustoc : audit, repositionnement et écoulement discrets en France et à l’export." />
     <link rel="canonical" href="https://solustoc.fr/revalorisation.html" />
@@ -24,62 +20,52 @@
     <meta property="og:url" content="https://solustoc.fr/revalorisation.html" />
     <meta property="og:image" content="https://solustoc.fr/bouteilles-vin-BHfRSzOA.jpg" />
 
-    <!-- JSON-LD -->
-    <script type="application/ld+json">
-    {
-      "@context":"https://schema.org",
-      "@type":"Service",
-      "name":"Revalorisation de lots",
-      "provider":{"@type":"Organization","name":"Solustoc","url":"https://solustoc.fr"},
-      "areaServed":"FR",
-      "url":"https://solustoc.fr/revalorisation.html",
-      "description":"Audit, repositionnement et écoulement discrets de lots de vin en B2B."
-    }
-    </script>
+    <!-- CSS + JS du site (rend la home) -->
+    <link rel="stylesheet" crossorigin href="./index-BvEbwHs3.css" />
+    <script type="module" crossorigin src="./index-CiN389WB.js"></script>
 
-    <!-- Mise en page légère pour le contenu (pas de couleurs, on laisse la charte de la home gérer via le hero/footers clonés) -->
+    <!-- Un poil de style neutre pour notre contenu central -->
     <style>
-      body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;line-height:1.6}
-      .container{max-width:1100px;margin:0 auto;padding:24px}
-      .content{margin: 32px 0}
-      .content h2{margin-top:24px}
-      .card{border:1px solid #eee;border-radius:14px;padding:18px;background:#fff;margin-top:16px}
-      .muted{opacity:.9}
-      footer.placeholder{opacity:.3}
+      .svc-container{max-width:1100px;margin:0 auto;padding:24px}
+      .svc-card{border:1px solid #eee;border-radius:14px;padding:18px;background:#fff;margin-top:16px}
+      .svc-muted{opacity:.9}
+      .svc-grid{display:grid;gap:18px}
+      @media(min-width:900px){.svc-grid{grid-template-columns:1.2fr .8fr}}
     </style>
   </head>
   <body>
+    <!-- La home va se rendre dans #root -->
+    <div id="root"></div>
 
-    <!-- HERO (sera copié depuis la home pour garder exactement le même look) -->
-    <section id="hero-host"></section>
-
-    <!-- Contenu spécifique Revalorisation -->
-    <main class="container content">
+    <!-- Notre contenu service (invisible au départ, on l’insérera entre hero et footer) -->
+    <main id="svc-content" class="svc-container" style="display:none">
       <header>
         <h1>Revalorisation de lots</h1>
-        <p class="muted">Nous aidons les professionnels à <strong>repositionner</strong> et <strong>écouler</strong> leurs stocks en préservant la marge et l’image.</p>
+        <p class="svc-muted">Nous aidons les professionnels à <strong>repositionner</strong> et <strong>écouler</strong> leurs stocks en préservant la marge et l’image.</p>
       </header>
 
-      <section class="card">
-        <h2>Ce que nous faisons</h2>
-        <ul>
-          <li>Audit rapide du stock (volumes, DO/IGP, millésimes, prix, circuits possibles).</li>
-          <li>Repackaging, étiquetage et assortiments pour raviver l’intérêt.</li>
-          <li>Négociation et placements discrets en France et à l’export.</li>
-        </ul>
+      <section class="svc-grid">
+        <article class="svc-card">
+          <h2>Ce que nous faisons</h2>
+          <ul>
+            <li>Audit rapide du stock (volumes, DO/IGP, millésimes, prix, circuits possibles).</li>
+            <li>Repackaging, étiquetage et assortiments pour raviver l’intérêt.</li>
+            <li>Négociation et placements discrets en France et à l’export.</li>
+          </ul>
+        </article>
+
+        <aside class="svc-card">
+          <h2>Pourquoi Solustoc ?</h2>
+          <ul>
+            <li>Approche discrète & circuits maîtrisés.</li>
+            <li>Réseau B2B qualifié (cavistes, grossistes, CHR, export).</li>
+            <li>Priorité à la marge & à la protection d’image.</li>
+          </ul>
+        </aside>
       </section>
 
-      <section class="card">
-        <h2>Pourquoi Solustoc ?</h2>
-        <ul>
-          <li>Approche discrète & circuits maîtrisés.</li>
-          <li>Réseau B2B qualifié (cavistes, grossistes, CHR, export).</li>
-          <li>Priorité à la marge & à la protection d’image.</li>
-        </ul>
-      </section>
-
-      <!-- Formulaire (même endpoint que l’accueil) -->
-      <section id="contact" class="card">
+      <!-- Formulaire de contact (même endpoint) -->
+      <section id="contact" class="svc-card">
         <h2>Parlez-nous de vos lots</h2>
         <form action="https://formspree.io/f/mrbyzegw" method="POST">
           <input type="hidden" name="_subject" value="Contact Revalorisation – Solustoc" />
@@ -92,97 +78,92 @@
           <label for="message">Votre message</label>
           <textarea id="message" name="message" required rows="5" style="width:100%;padding:10px;margin:6px 0 12px;border:1px solid #ccc;border-radius:8px;"></textarea>
 
-          <button type="submit" id="submit-btn">Envoyer</button>
+          <button type="submit" id="svc-submit">Envoyer</button>
         </form>
       </section>
     </main>
 
-    <!-- Footer de secours (remplacé par le footer de la home au chargement) -->
-    <footer class="placeholder">
-      <div class="container"><small>© Solustoc</small></div>
-    </footer>
-
-    <!-- Script : clone le HERO et le FOOTER depuis la home (même domaine) + applique le style du bouton principal au bouton "Envoyer" -->
+    <!-- Script : garde seulement le HERO & le FOOTER de la home, puis insère notre contenu entre les deux -->
     <script>
-      (function () {
-        function norm(s){return (s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/\s+/g,' ').trim();}
-        function copyButtonStyle(fromEl, toEl) {
-          if (!fromEl || !toEl) return;
-          const cs = getComputedStyle(fromEl);
-          const props = [
-            'background','backgroundColor','backgroundImage','backgroundSize','backgroundPosition','backgroundRepeat',
-            'border','borderColor','borderStyle','borderWidth','borderRadius','boxShadow',
-            'color','textTransform','letterSpacing','fontWeight',
-            'padding','paddingTop','paddingBottom','paddingLeft','paddingRight',
-            'transition','filter'
-          ];
-          props.forEach(p => { try { toEl.style[p] = cs[p]; } catch(e){} });
-          toEl.style.cursor = 'pointer';
+      (function(){
+        const norm = s => (s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+        let applied = false;
+
+        function keepHeroAndFooter() {
+          if (applied) return; // une seule fois
+          const root = document.getElementById('root');
+          if (!root) return;
+
+          // 1) Trouver le HERO par son texte (Solutions Discrètes + CTA)
+          const all = root.querySelectorAll('section, header, main section, div');
+          let hero = null;
+          for (const el of all) {
+            const t = norm(el.textContent);
+            if (t.includes('solutions discretes') || t.includes('votre negoce de vin')) {
+              if (t.includes('demander un echange') || t.includes('demander un échange')) {
+                hero = el;
+                break;
+              }
+            }
+          }
+
+          // 2) Trouver le FOOTER
+          const footer = root.querySelector('footer');
+
+          if (!footer) return;
+          if (!hero) {
+            // fallback : on garde quand même le footer et on continue
+            hero = null;
+          }
+
+          // 3) Déterminer les "top-level" à garder sous #root
+          function topOf(el){
+            let n = el;
+            while (n && n.parentElement !== root) n = n.parentElement;
+            return n;
+          }
+          const keep = new Set();
+          if (hero) keep.add(topOf(hero));
+          keep.add(topOf(footer));
+
+          // 4) Supprimer tout le reste sous #root
+          Array.from(root.children).forEach(ch => {
+            if (!keep.has(ch)) ch.remove();
+          });
+
+          // 5) Insérer notre contenu entre hero et footer
+          const svc = document.getElementById('svc-content');
+          if (svc) {
+            svc.style.display = 'block';
+            const footerTop = topOf(footer);
+            root.insertBefore(svc, footerTop);
+          }
+
+          // 6) Harmoniser le bouton "Envoyer" avec le style d’un bouton principal du hero si dispo
+          try {
+            const btnSrc = root.querySelector('a,button,[role="button"]');
+            const btnDst = document.getElementById('svc-submit');
+            if (btnSrc && btnDst) {
+              const cs = getComputedStyle(btnSrc);
+              ['background','backgroundColor','backgroundImage','backgroundSize','backgroundPosition','backgroundRepeat',
+               'border','borderColor','borderStyle','borderWidth','borderRadius','boxShadow',
+               'color','textTransform','letterSpacing','fontWeight',
+               'padding','paddingTop','paddingBottom','paddingLeft','paddingRight',
+               'transition','filter'
+              ].forEach(p => { try { btnDst.style[p] = cs[p]; } catch(e){} });
+              btnDst.style.cursor = 'pointer';
+            }
+          } catch(e){}
+
+          applied = true;
         }
 
-        window.addEventListener('load', function(){
-          // Charge la home en cache
-          const ifr = document.createElement('iframe');
-          ifr.src = '/';
-          ifr.style.position = 'fixed';
-          ifr.style.width = '0';
-          ifr.style.height = '0';
-          ifr.style.opacity = '0';
-          ifr.style.pointerEvents = 'none';
-          document.body.appendChild(ifr);
-
-          ifr.addEventListener('load', function(){
-            try {
-              const doc = ifr.contentDocument || ifr.contentWindow.document;
-
-              // === HERO : cherche un bloc qui contient "Solutions Discr" et les deux CTA ===
-              const cands = Array.from(doc.querySelectorAll('section, header, main section, div'));
-              function looksLikeHero(el){
-                const t = norm(el.textContent);
-                const hasTitle = t.includes('solutions discretes') || t.includes('solutions discr') || t.includes('votre negoce de vin');
-                const hasCta1 = t.includes('demander un echange') || t.includes('demander un échange');
-                const hasCta2 = t.includes('decouvrir nos services') || t.includes('découvrir nos services');
-                return hasTitle && hasCta1 && hasCta2;
-              }
-              let hero = cands.find(looksLikeHero);
-              if (!hero) {
-                // fallback : plus grand bloc proche du haut
-                const nearTop = cands.filter(el => el.getBoundingClientRect().top < 600);
-                hero = nearTop.sort((a,b)=> b.getBoundingClientRect().height - a.getBoundingClientRect().height)[0];
-              }
-              if (hero) {
-                const clone = hero.cloneNode(true);
-                const host = document.getElementById('hero-host');
-                host.appendChild(clone);
-              }
-
-              // === FOOTER : clone tel quel ===
-              const homeFooter = doc.querySelector('footer');
-              if (homeFooter) {
-                const localFooter = document.querySelector('footer');
-                const cloneF = homeFooter.cloneNode(true);
-                if (localFooter) localFooter.replaceWith(cloneF);
-                else document.body.appendChild(cloneF);
-              }
-
-              // === STYLE du bouton principal appliqué au bouton "Envoyer" ===
-              const buttons = Array.from(doc.querySelectorAll('a,button,[role="button"]'));
-              const srcBtn = buttons.find(el=>{
-                const t = norm(el.textContent);
-                return t.includes('demander un echange') || t.includes('demander un échange');
-              }) || buttons.find(el=>{
-                const t = norm(el.textContent);
-                return t.includes('decouvrir nos services') || t.includes('découvrir nos services');
-              });
-              const dstBtn = document.getElementById('submit-btn');
-              if (srcBtn && dstBtn) copyButtonStyle(srcBtn, dstBtn);
-
-            } catch (e) {
-              console.warn('Clone hero/footer failed:', e);
-            } finally {
-              setTimeout(()=> ifr.remove(), 100);
-            }
-          });
+        // Lance après rendu initial + observe une courte période pour laisser React finir
+        window.addEventListener('load', () => {
+          setTimeout(keepHeroAndFooter, 120);
+          const mo = new MutationObserver(() => setTimeout(keepHeroAndFooter, 60));
+          mo.observe(document.getElementById('root'), { childList: true, subtree: true });
+          setTimeout(() => mo.disconnect(), 2000); // on arrête d'observer après stabilisation
         });
       })();
     </script>
