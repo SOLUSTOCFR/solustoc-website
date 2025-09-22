@@ -143,46 +143,95 @@
           'Conseil en négoce',
           'Solutions discrètes'
         ];
-        const norm = s => (s||'')
-          .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
-          .toLowerCase().replace(/\s+/g,' ').trim();
 
-        const LABELS_N = LABELS.map(norm);
-
-        function isJustLabelText(t) {
-          const s = norm(t);
-          // "texte seul" ≈ correspond à un libellé, avec marge de 10 caractères (séparateurs, points)
-          return LABELS_N.some(n => s === n || (s.includes(n) && s.length <= n.length + 10));
+        // Normalisation robuste (accents, ponctuation, espaces)
+        function norm(s) {
+          return (s || '')
+            .normalize('NFD').replace(/[\u0300-\u036f]/g,'') // accents
+            .replace(/[•|·|·|\-|–|—|:|;|,|\.|\/|\(|\)|\[|\]]/g,' ') // ponctuation courante
+            .toLowerCase()
+            .replace(/\s+/g,' ')
+            .trim();
         }
 
-        function cleanFooter() {
+        function hasAnchorAncestor(node) {
+          let p = node.parentNode;
+          while (p) {
+            if (p.nodeType === 1 && p.tagName === 'A') return true;
+            p = p.parentNode;
+          }
+          return false;
+        }
+
+        function containsAnchor(el) {
+          return !!el.querySelector('a');
+        }
+
+        function removeTextNode(node) {
+          if (node && node.parentNode) node.parentNode.removeChild(node);
+        }
+
+        function cleanFooterOnce() {
           const root = document.getElementById('root');
           const footer = (root && root.querySelector('footer')) || document.querySelector('footer');
           if (!footer) return;
 
-          // 1) Supprime les TEXT NODES directs qui dupliquent les libellés (sans lien)
-          Array.from(footer.childNodes).forEach(node => {
-            if (node.nodeType === 3) { // texte brut
-              if (isJustLabelText(node.textContent)) node.remove();
-            }
-          });
+          // 1) Récupère les libellés EXACTS présents en liens (référence)
+          const anchorLabels = new Set(
+            Array.from(footer.querySelectorAll('a'))
+              .map(a => norm(a.textContent))
+              .filter(t => t) // non vide
+          );
 
-          // 2) Supprime les petits éléments sans <a> qui ne contiennent que ces libellés
-          const elems = footer.querySelectorAll('*');
-          elems.forEach(el => {
-            if (el.tagName === 'A') return;                    // ne JAMAIS toucher aux liens
-            if (el.querySelector && el.querySelector('a')) return; // si un lien est dedans, on ne touche pas
-            if (el.childElementCount > 0) return;              // cible seulement les feuilles simples
-            const txt = el.textContent || '';
-            if (!txt.trim()) return;
-            // ne supprime que si c'est quasi exactement un libellé (pas un paragraphe)
-            if (isJustLabelText(txt)) el.remove();
+          // Si aucun lien service, on ne touche à rien
+          if (anchorLabels.size === 0) return;
+
+          // 2) Supprime les TEXT NODES qui doublonnent ces libellés et NE sont pas dans/avec un lien
+          const walker = document.createTreeWalker(footer, NodeFilter.SHOW_TEXT, null);
+          const toRemove = [];
+          while (walker.nextNode()) {
+            const tn = walker.currentNode;
+            const txt = norm(tn.textContent);
+            if (!txt) continue;
+            if (hasAnchorAncestor(tn)) continue; // ne pas toucher aux textes à l'intérieur d'un lien
+            if (anchorLabels.has(txt)) {
+              toRemove.push(tn);
+            }
+          }
+          toRemove.forEach(removeTextNode);
+
+          // 3) Supprime les petites balises SANS lien qui ne contiennent que ces libellés
+          const els = footer.querySelectorAll('*');
+          els.forEach(el => {
+            if (el.tagName === 'A') return;
+            if (containsAnchor(el)) return;
+            if (el.childElementCount > 0) return; // on ne cible que les "feuilles"
+            const t = norm(el.textContent);
+            if (!t) return;
+            if (anchorLabels.has(t)) {
+              el.remove();
+            }
           });
         }
 
-        window.addEventListener('load', () => { cleanFooter(); setTimeout(cleanFooter, 250); });
-        new MutationObserver(() => cleanFooter())
-          .observe(document.documentElement, { childList: true, subtree: true });
+        function cleanFooter() {
+          // double passe pour les rendus différés
+          cleanFooterOnce();
+          setTimeout(cleanFooterOnce, 200);
+        }
+
+        window.addEventListener('load', cleanFooter);
+
+        // Réapplique uniquement si le footer change
+        const observerTarget = document.documentElement;
+        new MutationObserver((muts) => {
+          for (const m of muts) {
+            if (m.target && (m.target.closest && m.target.closest('footer'))) {
+              cleanFooter();
+              break;
+            }
+          }
+        }).observe(observerTarget, { childList: true, subtree: true });
       })();
     </script>
   </body>
