@@ -14,7 +14,7 @@
   <body>
     <div id="root"></div>
 
-    <!-- Réduction "safe" du bandeau à ~35vh (sans masquer le contenu suivant) -->
+    <!-- Réduction "safe" du bandeau (~35vh) -->
     <script>
       (function () {
         function shrinkHero() {
@@ -25,15 +25,11 @@
             root.querySelectorAll('section, header, main section, div')
           ).filter(el => el.getBoundingClientRect().top < window.innerHeight * 0.4);
 
-          // 1) Priorité : un bloc qui contient "Solution Discr"
           let hero = nodes.find(el =>
             (el.textContent || '').toLowerCase().includes('solution discr')
           );
 
-          // 2) Sinon, un bloc avec classes plein écran (Tailwind-like)
           if (!hero) hero = nodes.find(el => /\b(min-)?h-(screen|svh)\b/.test(el.className || ''));
-
-          // 3) Sinon, le plus grand parmi les premiers candidats
           if (!hero) {
             hero = nodes.sort(
               (a, b) => b.getBoundingClientRect().height - a.getBoundingClientRect().height
@@ -41,7 +37,6 @@
           }
           if (!hero) return;
 
-          // Retire les classes plein écran si présentes
           hero.className = (hero.className || '')
             .replace(/\bmin-h-screen\b/g, '')
             .replace(/\bh-screen\b/g, '')
@@ -49,7 +44,6 @@
             .replace(/\bh-svh\b/g, '')
             .trim();
 
-          // Réglages "safe"
           hero.style.minHeight = '35vh';
           hero.style.height = 'auto';
           hero.style.paddingTop = '3rem';
@@ -69,23 +63,17 @@
       })();
     </script>
 
-    <!-- Uniformise "Découvrir nos services" sur "Demander un échange" -->
+    <!-- Harmonise "Découvrir nos services" avec "Demander un échange" -->
     <script>
       (function () {
         const norm = s =>
-          (s || '')
-            .normalize('NFD')
-            .replace(/[\u0300-\u036f]/g, '')
-            .toLowerCase()
-            .replace(/\s+/g, ' ')
-            .trim();
+          (s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/\s+/g, ' ').trim();
 
         function equalizeButtons() {
           const root = document.getElementById('root');
           if (!root) return;
 
           const candidates = root.querySelectorAll('button, a, [role="button"]');
-
           const findByText = (needle) => {
             const n = norm(needle);
             for (const el of candidates) {
@@ -95,24 +83,17 @@
             return null;
           };
 
-          // Source (style à copier)
-          const src =
-            findByText('demander un echange') || findByText('demander un échange');
-
-          // Cible (à recolorer)
-          const dst =
-            findByText('decouvrir nos services') || findByText('découvrir nos services');
+          const src = findByText('demander un echange') || findByText('demander un échange');
+          const dst = findByText('decouvrir nos services') || findByText('découvrir nos services');
 
           if (src && dst) {
             const cs = getComputedStyle(src);
-            const props = [
-              'background','backgroundColor','backgroundImage','backgroundSize','backgroundPosition','backgroundRepeat',
-              'border','borderColor','borderStyle','borderWidth','borderRadius','boxShadow',
-              'color','textTransform','letterSpacing','fontWeight',
-              'padding','paddingTop','paddingBottom','paddingLeft','paddingRight',
-              'transition','filter'
-            ];
-            props.forEach(p => { try { dst.style[p] = cs[p]; } catch(e){} });
+            ['background','backgroundColor','backgroundImage','backgroundSize','backgroundPosition','backgroundRepeat',
+             'border','borderColor','borderStyle','borderWidth','borderRadius','boxShadow',
+             'color','textTransform','letterSpacing','fontWeight',
+             'padding','paddingTop','paddingBottom','paddingLeft','paddingRight',
+             'transition','filter'
+            ].forEach(p => { try { dst.style[p] = cs[p]; } catch(e){} });
             dst.style.cursor = 'pointer';
           }
         }
@@ -134,188 +115,111 @@
       })();
     </script>
 
-    <!-- Nettoyage du footer : SUPPRIME UNIQUEMENT les doublons SANS lien (ne touche JAMAIS aux <a>) -->
+    <!-- Footer : transforme les 4 libellés en liens SANS toucher au reste (méthode non destructive) -->
     <script>
-      (function () {
-        const LABELS = [
-          'Revalorisation de lots',
-          'Mise en relation B2B',
-          'Conseil en négoce',
-          'Solutions discrètes'
-        ];
+      (function(){
+        const MAP = {
+          'revalorisation de lots': '/revalorisation.html',
+          'mise en relation b2b':   '/mise-en-relation-b2b.html',
+          'conseil en négoce':      '/conseil-negoce.html',
+          'solutions discrètes':    '/solutions-discretes.html'
+        };
+        const labels = Object.keys(MAP);
+        const norm = s => (s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/\s+/g,' ').trim();
 
-        // Normalisation robuste (accents, ponctuation, espaces)
-        function norm(s) {
-          return (s || '')
-            .normalize('NFD').replace(/[\u0300-\u036f]/g,'') // accents
-            .replace(/[•|·|·|\-|–|—|:|;|,|\.|\/|\(|\)|\[|\]]/g,' ') // ponctuation courante
-            .toLowerCase()
-            .replace(/\s+/g,' ')
-            .trim();
+        function wrapTextNodeWithLink(textNode, href, displayText){
+          const a = document.createElement('a');
+          a.href = href;
+          a.textContent = displayText;
+          a.style.textDecoration = 'underline';
+          textNode.parentNode.insertBefore(a, textNode);
+          // masquer le texte original au lieu de supprimer (sécurité)
+          const span = document.createElement('span');
+          span.textContent = textNode.textContent;
+          span.style.display = 'none';
+          textNode.parentNode.replaceChild(span, textNode);
         }
 
-        function hasAnchorAncestor(node) {
-          let p = node.parentNode;
-          while (p) {
-            if (p.nodeType === 1 && p.tagName === 'A') return true;
-            p = p.parentNode;
-          }
-          return false;
-        }
-
-        function containsAnchor(el) {
-          return !!el.querySelector('a');
-        }
-
-        function removeTextNode(node) {
-          if (node && node.parentNode) node.parentNode.removeChild(node);
-        }
-
-        function cleanFooterOnce() {
+        function linkifyFooterOnce() {
           const root = document.getElementById('root');
           const footer = (root && root.querySelector('footer')) || document.querySelector('footer');
           if (!footer) return;
 
-          // 1) Récupère les libellés EXACTS présents en liens (référence)
-          const anchorLabels = new Set(
-            Array.from(footer.querySelectorAll('a'))
-              .map(a => norm(a.textContent))
-              .filter(t => t) // non vide
-          );
-
-          // Si aucun lien service, on ne touche à rien
-          if (anchorLabels.size === 0) return;
-
-          // 2) Supprime les TEXT NODES qui doublonnent ces libellés et NE sont pas dans/avec un lien
-          const walker = document.createTreeWalker(footer, NodeFilter.SHOW_TEXT, null);
-          const toRemove = [];
-          while (walker.nextNode()) {
-            const tn = walker.currentNode;
-            const txt = norm(tn.textContent);
-            if (!txt) continue;
-            if (hasAnchorAncestor(tn)) continue; // ne pas toucher aux textes à l'intérieur d'un lien
-            if (anchorLabels.has(txt)) {
-              toRemove.push(tn);
-            }
-          }
-          toRemove.forEach(removeTextNode);
-
-          // 3) Supprime les petites balises SANS lien qui ne contiennent que ces libellés
-          const els = footer.querySelectorAll('*');
-          els.forEach(el => {
-            if (el.tagName === 'A') return;
-            if (containsAnchor(el)) return;
-            if (el.childElementCount > 0) return; // on ne cible que les "feuilles"
-            const t = norm(el.textContent);
-            if (!t) return;
-            if (anchorLabels.has(t)) {
-              el.remove();
+          // 1) Traite les éléments-feuilles (p/span/li/div…) sans lien, dont le texte correspond exactement à un libellé
+          const leaves = footer.querySelectorAll('*:not(a)');
+          leaves.forEach(el => {
+            if (el.childElementCount > 0) return;
+            if (el.closest('a')) return;        // si déjà dans un lien → skip
+            if (el.querySelector && el.querySelector('a')) return; // si contient un lien → skip
+            const raw = (el.textContent || '').trim();
+            if (!raw) return;
+            const key = norm(raw);
+            if (MAP[key]) {
+              // Insère un lien juste après, et masque l’élément original (non destructif)
+              const a = document.createElement('a');
+              a.href = MAP[key];
+              a.textContent = raw;
+              a.style.textDecoration = 'underline';
+              el.insertAdjacentElement('afterend', a);
+              el.style.display = 'none';
             }
           });
-        }
 
-        function cleanFooter() {
-          // double passe pour les rendus différés
-          cleanFooterOnce();
-          setTimeout(cleanFooterOnce, 200);
-        }
-
-        window.addEventListener('load', cleanFooter);
-
-        // Réapplique uniquement si le footer change
-        const observerTarget = document.documentElement;
-        new MutationObserver((muts) => {
-          for (const m of muts) {
-            if (m.target && (m.target.closest && m.target.closest('footer'))) {
-              cleanFooter();
-              break;
+          // 2) Traite les nœuds texte bruts (ex: un bloc unique "Revalorisation de lots Mise en relation B2B …")
+          const walker = document.createTreeWalker(footer, NodeFilter.SHOW_TEXT);
+          const toProcess = [];
+          while (walker.nextNode()) {
+            const tn = walker.currentNode;
+            if (!tn.parentNode) continue;
+            if (tn.parentNode.closest('a')) continue; // pas dans un lien
+            const txt = (tn.nodeValue || '').trim();
+            if (!txt) continue;
+            const key = labels.find(lbl => norm(txt) === norm(lbl)); // exact match
+            if (key) {
+              toProcess.push({ tn, key, raw: txt });
             }
           }
-        }).observe(observerTarget, { childList: true, subtree: true });
+          toProcess.forEach(({ tn, key, raw }) => wrapTextNodeWithLink(tn, MAP[key], raw));
+
+          // 3) Cas d’un bloc COMBINÉ (plusieurs libellés collés) : on ajoute un petit groupe de liens après et on masque ce texte
+          // (sans toucher aux autres éléments du footer)
+          const walker2 = document.createTreeWalker(footer, NodeFilter.SHOW_TEXT);
+          while (walker2.nextNode()) {
+            const tn = walker2.currentNode;
+            if (!tn.parentNode || tn.parentNode.closest('a')) continue;
+            const txt = (tn.nodeValue || '').trim();
+            if (!txt) continue;
+            const hitCount = labels.reduce((n,lbl)=> n + (norm(txt).includes(norm(lbl)) ? 1 : 0), 0);
+            if (hitCount >= 2) {
+              const frag = document.createDocumentFragment();
+              labels.forEach((lbl, i) => {
+                const a = document.createElement('a');
+                a.href = MAP[lbl];
+                a.textContent = lbl.charAt(0).toUpperCase() + lbl.slice(1); // conserve majuscules si besoin
+                a.style.textDecoration = 'underline';
+                frag.appendChild(a);
+                if (i < labels.length - 1) frag.appendChild(document.createTextNode(' • '));
+              });
+              // insère après le nœud texte, et masque le nœud texte original
+              const span = document.createElement('span');
+              span.textContent = txt;
+              span.style.display = 'none';
+              tn.parentNode.insertBefore(frag, tn.nextSibling);
+              tn.parentNode.replaceChild(span, tn);
+              break; // un seul bloc combiné traité
+            }
+          }
+        }
+
+        function linkifyFooter() {
+          linkifyFooterOnce();
+          setTimeout(linkifyFooterOnce, 150);
+        }
+
+        window.addEventListener('load', linkifyFooter);
+        new MutationObserver(() => linkifyFooter())
+          .observe(document.documentElement, { childList: true, subtree: true });
       })();
     </script>
-    <!-- Linkifier les 4 services du footer (convertit le texte en <a href="...">) -->
-<!-- Linkifier correctement le bloc de services du footer -->
-<script>
-(function(){
-  const SERVICES = [
-    { label: 'Revalorisation de lots', href: '/revalorisation.html' },
-    { label: 'Mise en relation B2B',   href: '/mise-en-relation-b2b.html' },
-    { label: 'Conseil en négoce',      href: '/conseil-negoce.html' },
-    { label: 'Solutions discrètes',    href: '/solutions-discretes.html' },
-  ];
-  const norm = s => (s||'')
-    .normalize('NFD').replace(/[\u0300-\u036f]/g,'')   // accents
-    .toLowerCase().replace(/\s+/g,' ').trim();
-
-  function buildLinksFragment() {
-    const frag = document.createDocumentFragment();
-    SERVICES.forEach((svc, i) => {
-      const a = document.createElement('a');
-      a.href = svc.href;
-      a.textContent = svc.label;
-      a.style.textDecoration = 'underline';
-      frag.appendChild(a);
-      if (i < SERVICES.length - 1) frag.appendChild(document.createTextNode(' • '));
-    });
-    return frag;
-  }
-
-  function linkifyServicesBlock() {
-    const root = document.getElementById('root');
-    const footer = (root && root.querySelector('footer')) || document.querySelector('footer');
-    if (!footer) return;
-
-    // 1) On cherche un élément (pas <a>) qui contient AU MOINS 2 intitulés et aucun lien à l'intérieur
-    const candidates = Array.from(footer.querySelectorAll('*:not(a)')).filter(el => {
-      if (el.querySelector('a')) return false; // on ne touche pas si des liens sont déjà dedans
-      const txt = norm(el.textContent);
-      if (!txt) return false;
-      let hits = 0;
-      for (const s of SERVICES) if (txt.includes(norm(s.label))) hits++;
-      return hits >= 2; // bloc combiné
-    });
-
-    if (candidates.length) {
-      // On prend celui avec le plus de correspondances
-      candidates.sort((a, b) => {
-        const ha = SERVICES.reduce((n,s)=>n + (norm(a.textContent).includes(norm(s.label))?1:0), 0);
-        const hb = SERVICES.reduce((n,s)=>n + (norm(b.textContent).includes(norm(s.label))?1:0), 0);
-        return hb - ha;
-      });
-      const target = candidates[0];
-      // Remplace intégralement son contenu par les 4 liens propres
-      target.innerHTML = '';
-      target.appendChild(buildLinksFragment());
-      return;
-    }
-
-    // 2) Fallback : si chaque libellé est dans un petit élément séparé sans lien, on remplace feuille par <a>
-    const leaves = footer.querySelectorAll('*:not(a)');
-    leaves.forEach(el => {
-      if (el.childElementCount > 0) return;
-      if (el.querySelector && el.querySelector('a')) return;
-      const raw = (el.textContent || '').trim();
-      if (!raw) return;
-      const svc = SERVICES.find(s => norm(raw) === norm(s.label));
-      if (svc) {
-        const a = document.createElement('a');
-        a.href = svc.href;
-        a.textContent = raw;
-        a.style.textDecoration = 'underline';
-        el.replaceWith(a);
-      }
-    });
-  }
-
-  // Lance et relance après rendu
-  window.addEventListener('load', () => { linkifyServicesBlock(); setTimeout(linkifyServicesBlock, 150); });
-  new MutationObserver(() => linkifyServicesBlock())
-    .observe(document.documentElement, { childList: true, subtree: true });
-})();
-</script>
-
- 
-
   </body>
 </html>
