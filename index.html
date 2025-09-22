@@ -2,7 +2,10 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/x-icon" href="./favicon.ico" />
+    <!-- Nouveau favicon (depuis solustoc.com) -->
+    <link rel="icon" href="https://solustoc.com/wp-content/uploads/2025/03/cropped-logo-solu-stoc-scaled-1.jpg?v=2" type="image/jpeg" />
+    <link rel="shortcut icon" href="https://solustoc.com/wp-content/uploads/2025/03/cropped-logo-solu-stoc-scaled-1.jpg?v=2" type="image/jpeg" />
+    <link rel="apple-touch-icon" href="https://solustoc.com/wp-content/uploads/2025/03/cropped-logo-solu-stoc-scaled-1.jpg?v=2" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Solustoc - Négoce & Déstockage B2B Vin</title>
     <script type="module" crossorigin src="./index-CiN389WB.js"></script>
@@ -18,20 +21,15 @@
           const root = document.getElementById('root');
           if (!root) return;
 
-          // Cible les blocs proches du haut de page
           const nodes = Array.from(
             root.querySelectorAll('section, header, main section, div')
           ).filter(el => el.getBoundingClientRect().top < window.innerHeight * 0.4);
 
-          // 1) Priorité : un bloc qui contient "Solution Discr"
           let hero = nodes.find(el =>
             (el.textContent || '').toLowerCase().includes('solution discr')
           );
 
-          // 2) Sinon, un bloc avec classes plein écran (Tailwind-like)
           if (!hero) hero = nodes.find(el => /\b(min-)?h-(screen|svh)\b/.test(el.className || ''));
-
-          // 3) Sinon, le plus grand parmi les premiers candidats
           if (!hero) {
             hero = nodes.sort(
               (a, b) => b.getBoundingClientRect().height - a.getBoundingClientRect().height
@@ -39,7 +37,6 @@
           }
           if (!hero) return;
 
-          // Retire les classes plein écran si présentes
           hero.className = (hero.className || '')
             .replace(/\bmin-h-screen\b/g, '')
             .replace(/\bh-screen\b/g, '')
@@ -47,20 +44,17 @@
             .replace(/\bh-svh\b/g, '')
             .trim();
 
-          // Réglages "safe" : on ne force PAS height fixe ni overflow
           hero.style.minHeight = '35vh';
           hero.style.height = 'auto';
           hero.style.paddingTop = '3rem';
           hero.style.paddingBottom = '3rem';
         }
 
-        // Applique après chargement + petite marge pour le rendu React
         window.addEventListener('load', () => {
           shrinkHero();
           setTimeout(shrinkHero, 200);
         });
 
-        // Si le DOM change (React), on ré-applique calmement
         const mo = new MutationObserver(() => {
           clearTimeout(window.__shr_to);
           window.__shr_to = setTimeout(shrinkHero, 60);
@@ -69,7 +63,7 @@
       })();
     </script>
 
-    <!-- Uniformise la couleur/visuel de "Découvrir nos services" sur "Demander un échange" -->
+    <!-- Uniformise "Découvrir nos services" sur "Demander un échange" -->
     <script>
       (function () {
         const norm = s =>
@@ -95,11 +89,9 @@
             return null;
           };
 
-          // Source (style à copier)
           const src =
             findByText('demander un echange') || findByText('demander un échange');
 
-          // Cible (à recolorer)
           const dst =
             findByText('decouvrir nos services') || findByText('découvrir nos services');
 
@@ -122,7 +114,6 @@
           setTimeout(equalizeButtons, 200);
         });
 
-        // Ré-applique si le DOM change
         const root = document.getElementById('root');
         if (root) {
           let t;
@@ -142,10 +133,8 @@
           const root = document.getElementById('root');
           if (!root) return;
 
-          // Évite les doublons
           if (root.querySelector('.legal-links')) return;
 
-          // Récupérer le footer existant ou en créer un
           let footer = root.querySelector('footer');
           if (!footer) {
             footer = document.createElement('footer');
@@ -181,8 +170,6 @@
         }
 
         window.addEventListener('load', addLegalLinks);
-
-        // Ré-applique si React re-render
         const mo = new MutationObserver(() => addLegalLinks());
         mo.observe(document.documentElement, { childList: true, subtree: true });
       })();
