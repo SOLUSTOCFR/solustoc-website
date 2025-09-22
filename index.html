@@ -11,65 +11,61 @@
   <body>
     <div id="root"></div>
 
-    <!-- Réduction des 2 gros blocs du haut à ~35vh -->
+    <!-- Réduction "safe" du bandeau à ~35vh (sans masquer le contenu suivant) -->
     <script>
       (function () {
-        function applyShrink(el) {
-          if (!el) return;
-          el.style.setProperty('min-height', '50vh', 'important');
-          el.style.setProperty('height', '50vh', 'important');
-          el.style.setProperty('padding-top', '3rem', 'important');
-          el.style.setProperty('padding-bottom', '3rem', 'important');
-          el.style.setProperty('overflow', 'hidden', 'important');
-        }
+        function shrinkHero() {
+          const root = document.getElementById('root');
+          if (!root) return;
 
-        function shrinkTopBlocks() {
-          const rootEl = document.getElementById('root');
-          if (!rootEl) return;
+          // On cible les blocs proches du haut de page
+          const nodes = Array.from(
+            root.querySelectorAll('section, header, main section, div')
+          ).filter(el => el.getBoundingClientRect().top < window.innerHeight * 0.4);
 
-          // 1) Cible prioritaire : bloc contenant le texte “Solution Discrète”
-          // (au cas où on puisse l’identifier directement)
-          const allBlocks = rootEl.querySelectorAll('section, header, main section, div');
-          let targeted = [];
-          allBlocks.forEach(el => {
-            const txt = (el.textContent || '').toLowerCase();
-            if (txt.includes('solution discr') || txt.includes('solustoc')) {
-              targeted.push(el);
-            }
-          });
+          // 1) Priorité : un bloc qui contient "Solution Discr"
+          let hero = nodes.find(el =>
+            (el.textContent || '').toLowerCase().includes('solution discr')
+          );
 
-          // 2) Sinon, on détecte les blocs très hauts (>= 80% de la hauteur écran)
-          if (targeted.length === 0) {
-            const tall = [];
-            allBlocks.forEach(el => {
-              const h = el.getBoundingClientRect().height;
-              if (h >= window.innerHeight * 0.8) tall.push(el);
-            });
-            targeted = tall.slice(0, 2);
-          } else {
-            targeted = targeted.slice(0, 2);
+          // 2) Sinon, un bloc avec classes plein écran (Tailwind-like)
+          if (!hero) hero = nodes.find(el => /\b(min-)?h-(screen|svh)\b/.test(el.className));
+
+          // 3) Sinon, on prend le plus grand parmi les premiers candidats
+          if (!hero) {
+            hero = nodes.sort(
+              (a, b) => b.getBoundingClientRect().height - a.getBoundingClientRect().height
+            )[0];
           }
+          if (!hero) return;
 
-          targeted.forEach(applyShrink);
+          // Retrait des classes plein écran si présentes
+          hero.className = hero.className
+            .replace(/\bmin-h-screen\b/g, '')
+            .replace(/\bh-screen\b/g, '')
+            .replace(/\bmin-h-svh\b/g, '')
+            .replace(/\bh-svh\b/g, '')
+            .trim();
+
+          // Réglages "safe" : on ne force PAS height fixe ni overflow
+          hero.style.minHeight = '35vh';
+          hero.style.height = 'auto';
+          hero.style.paddingTop = '3rem';
+          hero.style.paddingBottom = '3rem';
         }
 
-        // Lance après le chargement + une frame pour laisser React rendre
+        // Applique après chargement + petite marge pour le rendu React
         window.addEventListener('load', () => {
-          requestAnimationFrame(shrinkTopBlocks);
-          // seconde passe après 300ms en cas de rendu différé
-          setTimeout(shrinkTopBlocks, 300);
+          shrinkHero();
+          setTimeout(shrinkHero, 200);
         });
 
-        // Si React modifie le DOM ensuite, on ré-applique
-        const rootEl = document.getElementById('root');
-        if (rootEl) {
-          let t;
-          const mo = new MutationObserver(() => {
-            clearTimeout(t);
-            t = setTimeout(shrinkTopBlocks, 50);
-          });
-          mo.observe(rootEl, { childList: true, subtree: true });
-        }
+        // Si le DOM change (React), on ré-applique calmement
+        const mo = new MutationObserver(() => {
+          clearTimeout(window.__shr_to);
+          window.__shr_to = setTimeout(shrinkHero, 60);
+        });
+        mo.observe(document.documentElement, { childList: true, subtree: true });
       })();
     </script>
   </body>
