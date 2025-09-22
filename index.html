@@ -235,71 +235,87 @@
       })();
     </script>
     <!-- Linkifier les 4 services du footer (convertit le texte en <a href="...">) -->
+<!-- Linkifier correctement le bloc de services du footer -->
 <script>
 (function(){
-  const MAP = {
-    'revalorisation de lots': '/revalorisation.html',
-    'mise en relation b2b':   '/mise-en-relation-b2b.html',
-    'conseil en négoce':      '/conseil-negoce.html',
-    'solutions discrètes':    '/solutions-discretes.html'
-  };
+  const SERVICES = [
+    { label: 'Revalorisation de lots', href: '/revalorisation.html' },
+    { label: 'Mise en relation B2B',   href: '/mise-en-relation-b2b.html' },
+    { label: 'Conseil en négoce',      href: '/conseil-negoce.html' },
+    { label: 'Solutions discrètes',    href: '/solutions-discretes.html' },
+  ];
   const norm = s => (s||'')
-    .normalize('NFD').replace(/[\u0300-\u036f]/g,'') // accents
+    .normalize('NFD').replace(/[\u0300-\u036f]/g,'')   // accents
     .toLowerCase().replace(/\s+/g,' ').trim();
 
-  function linkifyFooter() {
+  function buildLinksFragment() {
+    const frag = document.createDocumentFragment();
+    SERVICES.forEach((svc, i) => {
+      const a = document.createElement('a');
+      a.href = svc.href;
+      a.textContent = svc.label;
+      a.style.textDecoration = 'underline';
+      frag.appendChild(a);
+      if (i < SERVICES.length - 1) frag.appendChild(document.createTextNode(' • '));
+    });
+    return frag;
+  }
+
+  function linkifyServicesBlock() {
     const root = document.getElementById('root');
     const footer = (root && root.querySelector('footer')) || document.querySelector('footer');
     if (!footer) return;
 
-    // 1) Si un petit élément (span/p/div/li...) contient EXACTEMENT un libellé sans lien → remplace par <a>
+    // 1) On cherche un élément (pas <a>) qui contient AU MOINS 2 intitulés et aucun lien à l'intérieur
+    const candidates = Array.from(footer.querySelectorAll('*:not(a)')).filter(el => {
+      if (el.querySelector('a')) return false; // on ne touche pas si des liens sont déjà dedans
+      const txt = norm(el.textContent);
+      if (!txt) return false;
+      let hits = 0;
+      for (const s of SERVICES) if (txt.includes(norm(s.label))) hits++;
+      return hits >= 2; // bloc combiné
+    });
+
+    if (candidates.length) {
+      // On prend celui avec le plus de correspondances
+      candidates.sort((a, b) => {
+        const ha = SERVICES.reduce((n,s)=>n + (norm(a.textContent).includes(norm(s.label))?1:0), 0);
+        const hb = SERVICES.reduce((n,s)=>n + (norm(b.textContent).includes(norm(s.label))?1:0), 0);
+        return hb - ha;
+      });
+      const target = candidates[0];
+      // Remplace intégralement son contenu par les 4 liens propres
+      target.innerHTML = '';
+      target.appendChild(buildLinksFragment());
+      return;
+    }
+
+    // 2) Fallback : si chaque libellé est dans un petit élément séparé sans lien, on remplace feuille par <a>
     const leaves = footer.querySelectorAll('*:not(a)');
     leaves.forEach(el => {
-      if (el.childElementCount > 0) return;              // seulement des "feuilles"
-      if (el.querySelector && el.querySelector('a')) return; // si un lien est dedans, on ne touche pas
+      if (el.childElementCount > 0) return;
+      if (el.querySelector && el.querySelector('a')) return;
       const raw = (el.textContent || '').trim();
       if (!raw) return;
-      const key = norm(raw);
-      if (MAP[key]) {
+      const svc = SERVICES.find(s => norm(raw) === norm(s.label));
+      if (svc) {
         const a = document.createElement('a');
-        a.href = MAP[key];
+        a.href = svc.href;
         a.textContent = raw;
         a.style.textDecoration = 'underline';
         el.replaceWith(a);
       }
     });
-
-    // 2) Si c’est du texte brut (nœud texte) → remplace le nœud texte par <a>
-    const walker = document.createTreeWalker(footer, NodeFilter.SHOW_TEXT);
-    const toReplace = [];
-    while (walker.nextNode()) {
-      const tn = walker.currentNode;
-      const raw = (tn.nodeValue || '').trim();
-      if (!raw) continue;
-      if (tn.parentNode && tn.parentNode.closest('a')) continue; // déjà dans un lien → ne rien faire
-      const key = norm(raw);
-      if (MAP[key]) {
-        const a = document.createElement('a');
-        a.href = MAP[key];
-        a.textContent = raw;
-        a.style.textDecoration = 'underline';
-        toReplace.push({ tn, a });
-      }
-    }
-    toReplace.forEach(({ tn, a }) => tn.parentNode && tn.parentNode.replaceChild(a, tn));
   }
 
-  // Lance tôt et relance juste après (pour les rendus différés)
-  window.addEventListener('load', () => { 
-    linkifyFooter(); 
-    setTimeout(linkifyFooter, 120); 
-  });
-
-  // Si le DOM change, on re-linkifie
-  new MutationObserver(() => linkifyFooter())
+  // Lance et relance après rendu
+  window.addEventListener('load', () => { linkifyServicesBlock(); setTimeout(linkifyServicesBlock, 150); });
+  new MutationObserver(() => linkifyServicesBlock())
     .observe(document.documentElement, { childList: true, subtree: true });
 })();
 </script>
+
+ 
 
   </body>
 </html>
